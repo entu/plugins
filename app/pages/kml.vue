@@ -849,7 +849,6 @@ en:
   errorNoAccount: No account parameter!
   errorNoType: No type parameter!
   errorNoToken: No token parameter!
-  errorNoParent: No parent parameter!
   errorSelectFile: Please select a file
   errorSelectOneLocation: Please select at least one location to import
   uploadText: Click or drag a KML file to this area to upload.
@@ -875,7 +874,6 @@ et:
   errorNoAccount: Puudub 'account' parameeter!
   errorNoType: Puudub 'type' parameeter!
   errorNoToken: Puudub 'token' parameeter!
-  errorNoParent: Puudub 'parent' parameeter!
   errorSelectFile: Palun valige fail
   errorSelectOneLocation: Palun valige vähemalt üks asukoht importimiseks
   uploadText: Lohista KML fail siia või klõpsa siin, et fail valida.
