@@ -9,6 +9,13 @@ export default defineNuxtConfig({
   ],
   ssr: false,
   devtools: { enabled: false },
+  app: {
+    head: {
+      script: [
+        { src: 'https://analytics.entu.dev/ea.min.js', 'data-site': 'plugins.entu.app', crossorigin: 'anonymous', defer: true }
+      ]
+    }
+  },
   spaLoadingTemplate: false,
   runtimeConfig: {
     discogsKey: '',
