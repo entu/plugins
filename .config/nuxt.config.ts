@@ -2,10 +2,10 @@
 export default defineNuxtConfig({
   modules: [
     '@nuxt/eslint',
+    '@nuxt/icon',
     '@nuxtjs/i18n',
     '@nuxtjs/tailwindcss',
-    '@vueuse/nuxt',
-    'nuxt-icons'
+    '@vueuse/nuxt'
   ],
   ssr: false,
   devtools: { enabled: false },
@@ -36,6 +36,12 @@ export default defineNuxtConfig({
   },
   i18n: {
     vueI18n: '~~/.config/i18n.config.ts'
+  },
+  icon: {
+    customCollections: [{
+      dir: './app/assets/icons',
+      prefix: 'local'
+    }]
   },
   tailwindcss: {
     cssPath: '~/assets/tailwind.css',

@@ -381,17 +381,17 @@ onMounted(async () => {
             <my-icon
               v-if="templateProperty._sharing === 'public'"
               class="text-gray-500 group-hover:text-orange-600"
-              icon="sharing/public"
+              icon="sharing-public"
             />
             <my-icon
               v-else-if="templateProperty._sharing === 'domain'"
               class="text-gray-500 group-hover:text-yellow-600"
-              icon="sharing/domain"
+              icon="sharing-domain"
             />
             <my-icon
               v-else
               class="text-gray-500 group-hover:text-green-600"
-              icon="sharing/private"
+              icon="sharing-private"
             />
           </td>
         </tr>

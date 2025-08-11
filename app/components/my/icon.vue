@@ -1,15 +1,15 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <script setup>
 defineProps({
+  set: { type: String, default: 'local' },
   icon: { type: String, required: true }
 })
 </script>
 
 <template>
-  <nuxt-icon
-    class="text-base"
+  <Icon
     filled
-    :name="icon"
+    :name="`${set}:${icon}`"
   />
 </template>
 
