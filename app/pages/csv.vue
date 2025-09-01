@@ -100,7 +100,7 @@ watch([file, encoding], ([fileValue, encodingValue]) => {
 })
 
 async function getTypes () {
-  const result = await $fetch(`${runtimeConfig.public.entuUrl}/api/${query.account}/entity`, {
+  const { entities } = await $fetch(`${runtimeConfig.public.entuUrl}/api/${query.account}/entity`, {
     headers: { Authorization: `Bearer ${query.token}` },
     query: {
       '_parent.reference': query.type,
@@ -110,13 +110,6 @@ async function getTypes () {
       props: 'name,label,type,ordinal'
     }
   })
-
-  if (!result.ok) {
-    console.error('Failed to fetch types')
-    return
-  }
-
-  const { entities } = await result.json()
 
   if (!entities.length) {
     console.error('No types')
