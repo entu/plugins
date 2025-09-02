@@ -83,6 +83,8 @@ watch(file, (value) => {
 
 const checkedCount = computed(() => csvContent.value?.filter((x) => !x._id).filter((x) => x.selected)?.length || 0)
 
+const hasPropertyMapping = computed(() => selectedProperties.value.some(Boolean))
+
 watch([file, encoding], ([fileValue, encodingValue]) => {
   if (!fileValue) return
 
@@ -372,7 +374,7 @@ onMounted(() => {
         v-if="csvContent?.length && !importing"
         class="block"
         type="primary"
-        :disabled="checkedCount === 0"
+        :disabled="checkedCount === 0 || !hasPropertyMapping"
         @click="doImport()"
       >
         {{ t('import', checkedCount || 0) }}
