@@ -15,33 +15,56 @@ const existingTypes = ref()
 const selectedTemplateEntityId = ref()
 
 const templateEntitiesOptions = computed(() => {
-  const result = templateEntities.value?.map((x) => ({
-    label: x.label,
-    value: x._id,
-    disabled: existingTypes.value?.includes(x._type)
-  }))
+  const notImported = []
+  const alreadyImported = []
 
-  result.sort((a, b) => a.label.localeCompare(b.label))
+  templateEntities.value?.forEach((x) => {
+    const isImported = existingTypes.value?.some((e) => e.name === x._type)
+    const option = { label: x.label, value: x._id }
+
+    if (isImported) {
+      alreadyImported.push(option)
+    }
+    else {
+      notImported.push(option)
+    }
+  })
+
+  notImported.sort((a, b) => a.label.localeCompare(b.label))
+  alreadyImported.sort((a, b) => a.label.localeCompare(b.label))
+
+  const result = []
+
+  if (notImported.length) {
+    result.push({ type: 'group', label: t('groupNotImported'), children: notImported })
+  }
+
+  if (alreadyImported.length) {
+    result.push({ type: 'group', label: t('groupAlreadyImported'), children: alreadyImported })
+  }
 
   return result
 })
 
 const allChecked = computed({
   get: () => {
-    return templateProperties.value?.every((x) => x.selected)
+    return templateProperties.value?.filter((x) => !x.alreadyImported)?.every((x) => x.selected)
   },
   set: (value) => {
     templateProperties.value
-      ?.filter((x) => !x.newId)
+      ?.filter((x) => !x.newId && !x.alreadyImported)
       ?.forEach((x) => { x.selected = value })
   }
 })
 
-const someChecked = computed(() => templateProperties.value?.filter((x) => !x.newId)?.some((x) => x.selected) && !allChecked.value)
+const someChecked = computed(() => templateProperties.value?.filter((x) => !x.newId && !x.alreadyImported)?.some((x) => x.selected) && !allChecked.value)
 
-const checkedCount = computed(() => templateProperties.value?.filter((x) => !x.newId).filter((x) => x.selected)?.length || 0)
+const checkedCount = computed(() => templateProperties.value?.filter((x) => !x.newId && !x.alreadyImported).filter((x) => x.selected)?.length || 0)
 
 const selectedPropertyIds = computed(() => templateProperties.value?.filter((x) => x.selected)?.map((x) => x._id))
+
+const newProperties = computed(() => templateProperties.value?.filter((x) => !x.alreadyImported) || [])
+const existingProperties = computed(() => templateProperties.value?.filter((x) => x.alreadyImported) || [])
 
 watch(selectedTemplateEntityId, async (value) => {
   if (!value) return
@@ -67,6 +90,7 @@ async function getTemplateEntities () {
 }
 
 async function getTemplateProperties (entityId) {
+  const { account, token } = query
   const data = await $fetch('/api/template', {
     query: {
       '_parent.reference': entityId,
@@ -74,6 +98,25 @@ async function getTemplateProperties (entityId) {
       props: 'name,label,description,type,ordinal,_sharing'
     }
   })
+
+  const templateEntity = templateEntities.value?.find((x) => x._id === entityId)
+  const existingEntity = existingTypes.value?.find((e) => e.name === templateEntity?._type)
+
+  let existingPropertyNames = []
+
+  if (existingEntity) {
+    const existingPropsData = await $fetch(`${runtimeConfig.public.entuUrl}/api/${account}/entity`, {
+      headers: { Authorization: `Bearer ${token}` },
+      query: {
+        '_type.string': 'property',
+        '_parent.reference': existingEntity._id,
+        props: 'name',
+        limit: 500
+      }
+    })
+
+    existingPropertyNames = existingPropsData?.entities?.map((x) => getValue(x.name, locale.value)) || []
+  }
 
   const properties = data?.entities?.map((x) => ({
     _id: x._id,
@@ -83,7 +126,8 @@ async function getTemplateProperties (entityId) {
     type: getValue(x.type, locale.value),
     ordinal: getValue(x.ordinal, locale.value, 'number'),
     _sharing: getValue(x._sharing, locale.value),
-    selected: true
+    alreadyImported: existingPropertyNames.includes(getValue(x.name, locale.value)),
+    selected: !existingPropertyNames.includes(getValue(x.name, locale.value))
   }))
 
   properties.sort((a, b) => {
@@ -124,7 +168,10 @@ async function getExistingTypes () {
     }
   })
 
-  return data?.entities?.map((x) => getValue(x.name, locale.value))
+  return data?.entities?.map((x) => ({
+    _id: x._id,
+    name: getValue(x.name, locale.value)
+  }))
 }
 
 async function getParentType () {
@@ -311,6 +358,9 @@ onMounted(async () => {
       class="mx-auto flex w-60 flex-col items-center justify-center"
       :class="{ 'h-96': !selectedTemplateEntityId }"
     >
+      <div class="mb-3 text-sm text-gray-600">
+        {{ t('description') }}
+      </div>
       <div class="mb-1 w-full text-center">
         {{ t('entitiesInfo') }}
       </div>
@@ -357,44 +407,103 @@ onMounted(async () => {
       </thead>
 
       <tbody>
-        <tr
-          v-for="templateProperty in templateProperties"
-          :key="templateProperty._id"
-          class="group border-t border-gray-200 hover:bg-gray-50"
-        >
-          <td class="p-3">
-            <n-checkbox
-              v-model:checked="templateProperty.selected"
-              :disabled="!!templateProperty.newId"
-            />
-          </td>
-          <td class="p-3 text-sm">
-            {{ templateProperty._type }}
-          </td>
-          <td class="w-full p-3 text-sm">
-            {{ templateProperty.label }}
-          </td>
-          <td class="p-3 text-sm">
-            {{ templateProperty.type }}
-          </td>
-          <td class="w-32 p-3 text-sm">
-            <my-icon
-              v-if="templateProperty._sharing === 'public'"
-              class="text-gray-500 group-hover:text-orange-600"
-              icon="sharing-public"
-            />
-            <my-icon
-              v-else-if="templateProperty._sharing === 'domain'"
-              class="text-gray-500 group-hover:text-yellow-600"
-              icon="sharing-domain"
-            />
-            <my-icon
-              v-else
-              class="text-gray-500 group-hover:text-green-600"
-              icon="sharing-private"
-            />
-          </td>
-        </tr>
+        <template v-if="newProperties.length">
+          <tr>
+            <td
+              colspan="5"
+              class="bg-gray-50 px-3 py-1 text-xs font-semibold uppercase text-gray-500"
+            >
+              {{ t('groupNotImported') }}
+            </td>
+          </tr>
+          <tr
+            v-for="templateProperty in newProperties"
+            :key="templateProperty._id"
+            class="group border-t border-gray-200 hover:bg-gray-50"
+          >
+            <td class="p-3">
+              <n-checkbox
+                v-model:checked="templateProperty.selected"
+                :disabled="!!templateProperty.newId"
+              />
+            </td>
+            <td class="p-3 text-sm">
+              {{ templateProperty._type }}
+            </td>
+            <td class="w-full p-3 text-sm">
+              {{ templateProperty.label }}
+            </td>
+            <td class="p-3 text-sm">
+              {{ templateProperty.type }}
+            </td>
+            <td class="w-32 p-3 text-sm">
+              <my-icon
+                v-if="templateProperty._sharing === 'public'"
+                class="text-gray-500 group-hover:text-orange-600"
+                icon="sharing-public"
+              />
+              <my-icon
+                v-else-if="templateProperty._sharing === 'domain'"
+                class="text-gray-500 group-hover:text-yellow-600"
+                icon="sharing-domain"
+              />
+              <my-icon
+                v-else
+                class="text-gray-500 group-hover:text-green-600"
+                icon="sharing-private"
+              />
+            </td>
+          </tr>
+        </template>
+
+        <template v-if="existingProperties.length">
+          <tr>
+            <td
+              colspan="5"
+              class="bg-gray-50 px-3 py-1 text-xs font-semibold uppercase text-gray-500"
+            >
+              {{ t('groupAlreadyImported') }}
+            </td>
+          </tr>
+          <tr
+            v-for="templateProperty in existingProperties"
+            :key="templateProperty._id"
+            class="group border-t border-gray-200 hover:bg-gray-50"
+          >
+            <td class="p-3">
+              <n-checkbox
+                v-model:checked="templateProperty.selected"
+                :disabled="!!templateProperty.newId || templateProperty.alreadyImported"
+              />
+            </td>
+            <td class="p-3 text-sm">
+              {{ templateProperty._type }}
+            </td>
+            <td class="w-full p-3 text-sm">
+              {{ templateProperty.label }}
+            </td>
+            <td class="p-3 text-sm">
+              {{ templateProperty.type }}
+            </td>
+            <td class="w-32 p-3 text-sm">
+              <my-icon
+                v-if="templateProperty._sharing === 'public'"
+                class="text-gray-500 group-hover:text-orange-600"
+                icon="sharing-public"
+              />
+              <my-icon
+                v-else-if="templateProperty._sharing === 'domain'"
+                class="text-gray-500 group-hover:text-yellow-600"
+                icon="sharing-domain"
+              />
+              <my-icon
+                v-else
+                class="text-gray-500 group-hover:text-green-600"
+                icon="sharing-private"
+              />
+            </td>
+          </tr>
+        </template>
       </tbody>
     </table>
 
@@ -421,15 +530,21 @@ onMounted(async () => {
 
 <i18n lang="yaml">
 en:
+  description: "A quick way to set up your database schema. Pick a ready-made entity type from the shared template library — instead of defining types and their properties from scratch."
   entitiesInfo: Select which entity to import
   propertiesInfo: Choose which properties to import
+  groupNotImported: Not imported
+  groupAlreadyImported: Already imported
   name: Name
   label: Label
   type: Type
   import: Import entity | Import entity and 1 property | Import entity and {n} properties
 et:
+  description: "Kiire viis andmebaasi skeemi seadistamiseks. Vali valmis objektitüüp jagatud malliteegist — ilma tüüpide ja parameetrite käsitsi määramiseta."
   entitiesInfo: Vali mis objekt importida
   propertiesInfo: Vali mis parameetrid importida
+  groupNotImported: Impordimata
+  groupAlreadyImported: Juba imporditud
   name: Nimi
   label: Pealkiri
   type: Tüüp
