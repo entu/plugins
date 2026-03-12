@@ -354,13 +354,13 @@ onMounted(async () => {
     v-else
     class="flex h-full max-h-full flex-col gap-6 overflow-auto p-6"
   >
+    <div class="text-gray-600">
+      {{ t('description') }}
+    </div>
     <div
       class="mx-auto flex w-60 flex-col items-center justify-center"
       :class="{ 'h-96': !selectedTemplateEntityId }"
     >
-      <div class="mb-3 text-sm text-gray-600">
-        {{ t('description') }}
-      </div>
       <div class="mb-1 w-full text-center">
         {{ t('entitiesInfo') }}
       </div>
@@ -530,7 +530,7 @@ onMounted(async () => {
 
 <i18n lang="yaml">
 en:
-  description: "A quick way to set up your database schema. Pick a ready-made entity type from the shared template library — instead of defining types and their properties from scratch."
+  description: A quick way to set up your database schema. Pick a ready-made entity type from the shared template library. No need to manually specify types and parameters. You can always edit the imported entities and properties later.
   entitiesInfo: Select which entity to import
   propertiesInfo: Choose which properties to import
   groupNotImported: Not imported
@@ -540,7 +540,7 @@ en:
   type: Type
   import: Import entity | Import entity and 1 property | Import entity and {n} properties
 et:
-  description: "Kiire viis andmebaasi skeemi seadistamiseks. Vali valmis objektitüüp jagatud malliteegist — ilma tüüpide ja parameetrite käsitsi määramiseta."
+  description: Kiire viis andmebaasi seadistamiseks. Vali valmis objektitüüp jagatud malliteegist. Pole vaja käsitsi määrata tüüpe ja parameetreid. Imporditud objekte ja parameetreid saab hiljem alati muuta.
   entitiesInfo: Vali mis objekt importida
   propertiesInfo: Vali mis parameetrid importida
   groupNotImported: Impordimata
