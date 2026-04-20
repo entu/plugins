@@ -102,7 +102,7 @@ watch([file, encoding], ([fileValue, encodingValue]) => {
 })
 
 async function getTypes () {
-  const { entities } = await $fetch(`${runtimeConfig.public.entuUrl}/api/${query.account}/entity`, {
+  const { entities } = await $fetch(`${runtimeConfig.public.entuApiUrl}/${query.account}/entity`, {
     headers: { Authorization: `Bearer ${query.token}` },
     query: {
       '_parent.reference': query.type,
@@ -200,7 +200,7 @@ async function doImport () {
   for (let i = 0; i < entities.length; i++) {
     const entity = entities[i]
 
-    const result = await fetch(`${runtimeConfig.public.entuUrl}/api/${query.account}/entity`, {
+    const result = await fetch(`${runtimeConfig.public.entuApiUrl}/${query.account}/entity`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${query.token}`,

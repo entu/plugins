@@ -48,7 +48,7 @@ async function doImport (id) {
     }
   }
 
-  const { _id } = await $fetch(`${runtimeConfig.public.entuUrl}/api/${query.account}/entity`, {
+  const { _id } = await $fetch(`${runtimeConfig.public.entuApiUrl}/${query.account}/entity`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${query.token}` },
     body: properties.filter((x) => x.type && (x.string || x.reference))

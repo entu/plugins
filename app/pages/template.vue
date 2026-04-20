@@ -105,7 +105,7 @@ async function getTemplateProperties (entityId) {
   let existingPropertyNames = []
 
   if (existingEntity) {
-    const existingPropsData = await $fetch(`${runtimeConfig.public.entuUrl}/api/${account}/entity`, {
+    const existingPropsData = await $fetch(`${runtimeConfig.public.entuApiUrl}/${account}/entity`, {
       headers: { Authorization: `Bearer ${token}` },
       query: {
         '_type.string': 'property',
@@ -144,7 +144,7 @@ async function getNewType () {
 
   if (!account || !token || !parent) return
 
-  const data = await $fetch(`${runtimeConfig.public.entuUrl}/api/${account}/entity/${type}`, {
+  const data = await $fetch(`${runtimeConfig.public.entuApiUrl}/${account}/entity/${type}`, {
     headers: { Authorization: `Bearer ${token}` },
     query: { props: 'name' }
   })
@@ -160,7 +160,7 @@ async function getExistingTypes () {
 
   if (!account || !token || !parent) return
 
-  const data = await $fetch(`${runtimeConfig.public.entuUrl}/api/${account}/entity`, {
+  const data = await $fetch(`${runtimeConfig.public.entuApiUrl}/${account}/entity`, {
     headers: { Authorization: `Bearer ${token}` },
     query: {
       '_type.string': 'entity',
@@ -179,7 +179,7 @@ async function getParentType () {
 
   if (!account || !token || !parent) return
 
-  const data = await $fetch(`${runtimeConfig.public.entuUrl}/api/${account}/entity/${parent}`, {
+  const data = await $fetch(`${runtimeConfig.public.entuApiUrl}/${account}/entity/${parent}`, {
     headers: { Authorization: `Bearer ${token}` },
     query: { props: 'name' }
   })
@@ -195,7 +195,7 @@ async function getEntityAndPropertyId () {
 
   if (!account || !token) return
 
-  const entityData = await $fetch(`${runtimeConfig.public.entuUrl}/api/${account}/entity`, {
+  const entityData = await $fetch(`${runtimeConfig.public.entuApiUrl}/${account}/entity`, {
     headers: { Authorization: `Bearer ${token}` },
     query: {
       '_type.string': 'entity',
@@ -205,7 +205,7 @@ async function getEntityAndPropertyId () {
     }
   })
 
-  const propertyData = await $fetch(`${runtimeConfig.public.entuUrl}/api/${account}/entity`, {
+  const propertyData = await $fetch(`${runtimeConfig.public.entuApiUrl}/${account}/entity`, {
     headers: { Authorization: `Bearer ${token}` },
     query: {
       '_type.string': 'entity',
@@ -271,7 +271,7 @@ async function doImport () {
     )
   }
 
-  const newEntity = await $fetch(`${runtimeConfig.public.entuUrl}/api/${account}/entity`, {
+  const newEntity = await $fetch(`${runtimeConfig.public.entuApiUrl}/${account}/entity`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}` },
     body: entityInsert
@@ -296,7 +296,7 @@ async function doImport () {
       )
     }
 
-    const newProperty = await $fetch(`${runtimeConfig.public.entuUrl}/api/${account}/entity`, {
+    const newProperty = await $fetch(`${runtimeConfig.public.entuApiUrl}/${account}/entity`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
       body: propertyInsert

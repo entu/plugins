@@ -1,4 +1,4 @@
-const { public: { entuUrl }, entuKey } = useRuntimeConfig()
+const { public: { entuApiUrl }, entuKey } = useRuntimeConfig()
 
 let token = null
 let tokenTime = null
@@ -9,13 +9,13 @@ export default defineEventHandler(async (event) => {
   const { _id, ...query } = getQuery(event)
 
   if (_id) {
-    return $fetch(`${entuUrl}/api/template/entity/${_id}`, {
+    return $fetch(`${entuApiUrl}/template/entity/${_id}`, {
       headers: { Authorization: `Bearer ${token}` },
       query
     })
   }
   else {
-    return $fetch(`${entuUrl}/api/template/entity`, {
+    return $fetch(`${entuApiUrl}/template/entity`, {
       headers: { Authorization: `Bearer ${token}` },
       query: {
         ...query,
@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
 
 async function getTemplateUser () {
   if (!userId || !token || tokenTime < Date.now()) {
-    const data = await $fetch(`${entuUrl}/api/auth`, {
+    const data = await $fetch(`${entuApiUrl}/auth`, {
       headers: { Authorization: `Bearer ${entuKey}` },
       query: { account: 'template' }
     })

@@ -548,7 +548,7 @@ function processDescription (description) {
 }
 
 async function sendEntityToEntu (baseProperties) {
-  const url = `${runtimeConfig.public.entuUrl}/api/${query.account}/entity`
+  const url = `${runtimeConfig.public.entuApiUrl}/${query.account}/entity`
   return await $fetch(
     url,
     {
