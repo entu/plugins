@@ -46,13 +46,19 @@ async function doImport (item) {
     }
   }
 
-  const { _id } = await $fetch(`${runtimeConfig.public.entuApiUrl}/${query.account}/entity`, {
+  const response = await $fetch(`${runtimeConfig.public.entuApiUrl}/${query.account}/entity`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${query.token}` },
     body: properties.filter((x) => x.type && (x.string || x.reference))
   })
 
-  await navigateTo(`${runtimeConfig.public.entuUrl}/${query.account}/${_id}#edit`, { external: true, open: { target: '_top' } })
+  if (!response?._id) {
+    error.value = 'Failed to import entity!'
+    isAdding.value = false
+    return
+  }
+
+  await navigateTo(`${runtimeConfig.public.entuUrl}/${query.account}/${response._id}#edit`, { external: true, open: { target: '_top' } })
 }
 
 function convertType (type) {
@@ -66,6 +72,11 @@ function convertType (type) {
     default:
       return type.replaceAll('-', '_')
   }
+}
+
+function doScan (value) {
+  queryString.value = value
+  doSearch()
 }
 
 onMounted(() => {
@@ -122,6 +133,11 @@ onMounted(() => {
       >
         {{ t('search') }}
       </n-button>
+
+      <barcode-scanner
+        :formats="['ean_13']"
+        @scan="doScan"
+      />
     </n-input-group>
 
     <div class="overflow-auto">

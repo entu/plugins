@@ -22,6 +22,11 @@ async function doSearch () {
   isLoading.value = false
 }
 
+function doScan (value) {
+  queryString.value = value
+  doSearch()
+}
+
 async function doImport (id) {
   if (!query.account) return
   if (!query.type) return
@@ -132,6 +137,11 @@ onMounted(() => {
       >
         {{ t('search') }}
       </n-button>
+
+      <barcode-scanner
+        :formats="['ean_13', 'upc_a']"
+        @scan="doScan"
+      />
     </n-input-group>
 
     <div class="overflow-auto">
