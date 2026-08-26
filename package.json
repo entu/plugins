@@ -15,7 +15,7 @@
     "cleanup": "nuxt cleanup"
   },
   "engines": {
-    "node": "22.x"
+    "node": "24.x"
   },
   "devDependencies": {
     "@nuxt/eslint": "1.17.0",
