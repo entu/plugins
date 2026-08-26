@@ -14,6 +14,8 @@ defineProps({
 </template>
 
 <style>
+@reference "tailwindcss";
+
 .nuxt-icon svg {
   @apply m-0;
 }
