@@ -149,6 +149,13 @@ onBeforeUnmount(() => {
     :title="t('scanBarcode')"
   >
     <div class="flex flex-col gap-4">
+      <div
+        v-show="!scanError"
+        class="text-center text-sm text-gray-500"
+      >
+        {{ t('scanInfo') }}
+      </div>
+
       <video
         v-show="!scanError"
         ref="video"
@@ -184,13 +191,15 @@ onBeforeUnmount(() => {
 <i18n lang="yaml">
   en:
     scanBarcode: Scan barcode
-    scanPhoto: Take a photo
+    scanInfo: Point the camera at the barcode. If it is not detected, take a photo of it with the button below.
+    scanPhoto: Take a photo of the barcode
     scanCameraError: Camera is not available. Take a photo instead.
     scanNotFound: No barcode found
     scanPhotoError: Could not read the photo
   et:
     scanBarcode: Skaneeri vöötkood
-    scanPhoto: Pildista
+    scanInfo: Suuna kaamera vöötkoodile. Kui seda ei tuvastata, pildista vöötkoodi allpool oleva nupuga.
+    scanPhoto: Pildista vöötkoodi
     scanCameraError: Kaamera pole saadaval. Pildista vöötkoodi.
     scanNotFound: Vöötkoodi ei leitud
     scanPhotoError: Fotot ei õnnestunud lugeda
