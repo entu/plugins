@@ -29,7 +29,7 @@ export default defineEventHandler(async (event) => {
     title: x.title,
     year: x.released,
     country: x.country,
-    format: [x.format].filter(Boolean),
+    format: [...new Set([...x.major_formats || [], ...x.format?.split(', ') || []])],
     label: [x.label].filter(Boolean),
     image: x.thumb
   }))
