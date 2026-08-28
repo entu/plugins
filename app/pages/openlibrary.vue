@@ -121,7 +121,7 @@ async function doImport (item) {
     return
   }
 
-  await uploadCover(photo, response.properties?.photo?.at(0)?.upload)
+  await uploadCover(photo, response.properties?.find((x) => x.type === 'photo')?.upload)
 
   await navigateTo(`${runtimeConfig.public.entuUrl}/${query.account}/${response._id}#edit`, { external: true, open: { target: '_top' } })
 }
