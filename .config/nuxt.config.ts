@@ -24,6 +24,8 @@ export default defineNuxtConfig({
     bricksetKey: '',
     discogsKey: '',
     entuKey: '',
+    igdbClientId: '',
+    igdbClientSecret: '',
     numistaKey: '',
     tmdbKey: '',
     public: {

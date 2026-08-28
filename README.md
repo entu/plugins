@@ -94,6 +94,21 @@ Imported properties depend on the record; the common ones are:
 | `tag` | Subject tags |
 | `udc` | UDC classification |
 
+### IGDB Import Plugin (`/igdb`)
+Search and import video game data, including cover images, from [IGDB](https://www.igdb.com).
+
+| Property | Description |
+|---|---|
+| `developer` | Developer(s) |
+| `genre` | Genre(s) |
+| `igdb_id` | IGDB game ID |
+| `name` | Game title |
+| `notes` | Summary |
+| `photo` | Cover image file |
+| `platform` | Platform(s) |
+| `publisher` | Publisher(s) |
+| `year` | First release year |
+
 ### KML Import Plugin (`/kml`)
 Import geographic locations from KML files.
 
@@ -210,6 +225,7 @@ All plugins use the same parameter structure:
 /csv?account=myaccount&type=book&token=abc123&parent=library1&locale=et
 /discogs?account=musicdb&type=album&token=xyz789&parent=collection1
 /ester?account=library&type=book&token=def456&locale=en
+/igdb?account=games&type=videogame&token=abc123&locale=en
 /kml?account=myaccount&type=location&token=abc123&parent=map1&locale=et
 /musicbrainz?account=musicdb&type=album&token=xyz789&locale=en
 /numista?account=coins&type=coin&token=abc123&locale=en
