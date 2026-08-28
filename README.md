@@ -20,6 +20,21 @@ Search and import board game data, including box art, from [BoardGameGeek](https
 | `publisher` | Publisher(s) (first 5) |
 | `year` | Publication year |
 
+### Brickset Import Plugin (`/brickset`)
+Search and import LEGO set data, including set images, from [Brickset](https://brickset.com).
+
+| Property | Description |
+|---|---|
+| `barcode` | EAN and UPC barcodes |
+| `brickset_id` | Set number (e.g. 75192-1) |
+| `minifigs` | Minifig count |
+| `name` | Set name |
+| `photo` | Set image file |
+| `pieces` | Piece count |
+| `subtheme` | Subtheme |
+| `theme` | Theme |
+| `year` | Release year |
+
 ### CSV Import Plugin (`/csv`)
 Import data from CSV files with support for multiple encodings.
 
@@ -153,6 +168,7 @@ All plugins use the same parameter structure:
 
 ```
 /bgg?account=games&type=boardgame&token=abc123&locale=en
+/brickset?account=lego&type=set&token=abc123&locale=en
 /csv?account=myaccount&type=book&token=abc123&parent=library1&locale=et
 /discogs?account=musicdb&type=album&token=xyz789&parent=collection1
 /ester?account=library&type=book&token=def456&locale=en

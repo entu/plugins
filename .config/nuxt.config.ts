@@ -21,6 +21,7 @@ export default defineNuxtConfig({
   spaLoadingTemplate: false,
   runtimeConfig: {
     bggKey: '',
+    bricksetKey: '',
     discogsKey: '',
     entuKey: '',
     tmdbKey: '',
