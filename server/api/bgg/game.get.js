@@ -3,7 +3,7 @@ import { XMLParser } from 'fast-xml-parser'
 const { bggKey } = useRuntimeConfig()
 
 const headers = { Authorization: `Bearer ${bggKey}` }
-const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '' })
+const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '', htmlEntities: true })
 
 export default defineEventHandler(async (event) => {
   const { id } = getQuery(event)
@@ -32,11 +32,15 @@ export default defineEventHandler(async (event) => {
       name: [toArray(data.name).find((n) => n.type === 'primary')?.value].filter(Boolean),
       year: [data.yearpublished?.value].filter(Boolean),
       designer: getLinks(data, 'boardgamedesigner'),
+      artist: getLinks(data, 'boardgameartist'),
       publisher: getLinks(data, 'boardgamepublisher').slice(0, 5),
       category: getLinks(data, 'boardgamecategory'),
+      mechanic: getLinks(data, 'boardgamemechanic'),
       min_players: [data.minplayers?.value].filter(Boolean),
       max_players: [data.maxplayers?.value].filter(Boolean),
-      playing_time: [data.playingtime?.value].filter(Boolean)
+      playing_time: [data.playingtime?.value].filter(Boolean),
+      age_min: [data.minage?.value].filter(Boolean),
+      notes: [data.description].filter(Boolean)
     },
     cover: await getCover(data.image)
   }

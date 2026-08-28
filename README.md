@@ -9,12 +9,16 @@ Search and import board game data, including box art, from [BoardGameGeek](https
 
 | Property | Description |
 |---|---|
+| `age_min` | Minimum recommended age |
+| `artist` | Artist(s) |
 | `bgg_id` | BoardGameGeek game ID |
 | `category` | Categories |
 | `designer` | Designer(s) |
 | `max_players` | Maximum player count |
+| `mechanic` | Mechanics |
 | `min_players` | Minimum player count |
 | `name` | Game title |
+| `notes` | Game description |
 | `photo` | Box art file |
 | `playing_time` | Playing time in minutes |
 | `publisher` | Publisher(s) (first 5) |
@@ -25,14 +29,20 @@ Search and import LEGO set data, including set images, from [Brickset](https://b
 
 | Property | Description |
 |---|---|
+| `age_max` | Maximum recommended age |
+| `age_min` | Minimum recommended age |
 | `barcode` | EAN and UPC barcodes |
 | `brickset_id` | Set number (e.g. 75192-1) |
+| `dimensions` | Box dimensions |
 | `minifigs` | Minifig count |
 | `name` | Set name |
+| `notes` | Set description |
 | `photo` | Set image file |
 | `pieces` | Piece count |
 | `subtheme` | Subtheme |
+| `tag` | Tags |
 | `theme` | Theme |
+| `weight` | Box weight |
 | `year` | Release year |
 
 ### CSV Import Plugin (`/csv`)
@@ -47,6 +57,7 @@ Search and import music release data from the [Discogs](https://www.discogs.com)
 |---|---|
 | `artist` | Artist name(s) |
 | `barcode` | Barcode(s) |
+| `catalog_number` | Catalogue number(s) |
 | `company` | Production, manufacturing, and distribution companies |
 | `country` | Release country |
 | `discogs_id` | Discogs release ID |
@@ -101,10 +112,12 @@ Search and import music release data, including cover art, from the [MusicBrainz
 |---|---|
 | `artist` | Artist name(s) |
 | `barcode` | Barcode |
+| `catalog_number` | Catalogue number(s) |
 | `country` | Release country |
 | `format` | Media format(s) (CD, Vinyl, etc.) |
 | `genre` | Genre(s) |
 | `label` | Record label(s) |
+| `language` | Language code |
 | `musicbrainz_id` | MusicBrainz release ID |
 | `name` | Release title |
 | `photo` | Cover art file (from Cover Art Archive) |
@@ -127,8 +140,10 @@ Search and import book data, including cover images, from the [Open Library](htt
 | `publisher` | Publisher(s) |
 | `publishing_date` | Publication date |
 | `publishing_place` | Place of publication |
+| `series` | Series |
 | `subtitle` | Subtitle |
 | `tag` | Subject tags |
+| `weight` | Weight |
 
 ### Template Import Plugin (`/template`)
 Import entity templates and their properties.
@@ -140,9 +155,13 @@ Search and import movie data, including posters, from [The Movie Database](https
 
 | Property | Description |
 |---|---|
+| `actor` | Actor(s) (top 10) |
+| `company` | Production companies |
 | `country` | Production countries |
 | `director` | Director(s) |
 | `genre` | Genre(s) |
+| `imdb_id` | IMDb ID |
+| `language` | Language code(s) |
 | `name` | Title (in the plugin's locale) |
 | `notes` | Overview |
 | `original_name` | Original title, if it differs |

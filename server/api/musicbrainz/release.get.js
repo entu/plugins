@@ -22,6 +22,8 @@ export default defineEventHandler(async (event) => {
       year: [data.date?.slice(0, 4)].filter(Boolean),
       country: [data.country].filter(Boolean),
       label: [...new Set(data['label-info']?.map((x) => x.label?.name).filter(Boolean) || [])],
+      catalog_number: [...new Set(data['label-info']?.map((x) => x['catalog-number']).filter(Boolean) || [])],
+      language: [data['text-representation']?.language].filter(Boolean),
       format: [...new Set(data.media?.map((x) => x.format).filter(Boolean) || [])],
       barcode: [data.barcode].filter(Boolean),
       genre: [...new Set(data.genres?.map((x) => x.name) || [])]

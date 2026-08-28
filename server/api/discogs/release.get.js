@@ -19,6 +19,7 @@ export default defineEventHandler(async (event) => {
       series: [...new Set(data.series?.map((x) => x.name))],
       series_number: [...new Set(data.series?.map((x) => x.catno))],
       label: [...new Set(data.labels?.map((x) => x.name))],
+      catalog_number: [...new Set(data.labels?.map((x) => x.catno).filter((x) => x && x.toLowerCase() !== 'none'))],
       company: [...new Set(data.companies?.map((x) => x.name))],
       format: [...new Set(data.formats?.map((x) => [x.name, ...x.descriptions]).flat())],
       title: [data.title],
