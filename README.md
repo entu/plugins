@@ -13,6 +13,9 @@ Search and import music release data from the Discogs database.
 ### Ester Import Plugin (`/ester`)
 Search and import data from the Ester library system.
 
+### Open Library Import Plugin (`/openlibrary`)
+Search and import book data, including cover images, from the Open Library catalog.
+
 ### Template Import Plugin (`/template`)
 Import entity templates and their properties.
 
@@ -35,6 +38,7 @@ All plugins use the same parameter structure:
 /csv?account=myaccount&type=book&token=abc123&parent=library1&locale=et
 /discogs?account=musicdb&type=album&token=xyz789&parent=collection1
 /ester?account=library&type=book&token=def456&locale=en
+/openlibrary?account=library&type=book&token=def456&locale=en
 /template?account=myaccount&type=entity&token=abc123&parent=templates&locale=et
 ```
 
