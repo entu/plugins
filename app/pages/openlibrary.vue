@@ -253,6 +253,13 @@ onMounted(() => {
       />
     </n-input-group>
 
+    <a
+      class="mx-auto -mt-4 text-xs opacity-50 hover:underline"
+      href="https://openlibrary.org"
+      rel="noopener noreferrer"
+      target="_blank"
+    >{{ t('source') }}</a>
+
     <div
       v-if="selectedWork"
       ref="editionsListElement"
@@ -397,6 +404,7 @@ onMounted(() => {
   en:
     search: Search
     searchInfo: Search from Open Library
+    source: Data provided by Open Library
     editions: Editions
     back: Back
     language: Language
@@ -404,6 +412,7 @@ onMounted(() => {
   et:
     search: Otsi
     searchInfo: Otsi Open Library-st
+    source: "Andmed: Open Library"
     editions: Väljaanded
     back: Tagasi
     language: Keel

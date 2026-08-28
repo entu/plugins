@@ -219,6 +219,13 @@ onMounted(() => {
       />
     </n-input-group>
 
+    <a
+      class="mx-auto -mt-4 text-xs opacity-50 hover:underline"
+      href="https://www.discogs.com"
+      rel="noopener noreferrer"
+      target="_blank"
+    >{{ t('source') }}</a>
+
     <div
       v-if="selectedMaster"
       ref="releasesListElement"
@@ -352,12 +359,14 @@ onMounted(() => {
   en:
     search: Search
     searchInfo: Search from Discogs
+    source: Data provided by Discogs
     releases: Releases
     back: Back
     import: Import
   et:
     search: Otsi
     searchInfo: Otsi Discogs-ist
+    source: "Andmed: Discogs"
     releases: Väljaanded
     back: Tagasi
     import: Impordi

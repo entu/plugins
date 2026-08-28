@@ -140,6 +140,13 @@ onMounted(() => {
       />
     </n-input-group>
 
+    <a
+      class="mx-auto -mt-4 text-xs opacity-50 hover:underline"
+      href="https://www.ester.ee"
+      rel="noopener noreferrer"
+      target="_blank"
+    >{{ t('source') }}</a>
+
     <div class="overflow-auto">
       <n-table
         v-if="esterItems.length > 0"
@@ -187,9 +194,11 @@ onMounted(() => {
   en:
     search: Search
     searchInfo: Search from ESTER
+    source: Data provided by ESTER
     import: Import
   et:
     search: Otsi
     searchInfo: Otsi ESTER-ist
+    source: "Andmed: e-kataloog ESTER"
     import: Impordi
   </i18n>
