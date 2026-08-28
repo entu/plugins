@@ -131,7 +131,13 @@ async function doImport (item) {
     return
   }
 
-  await uploadCover(photo, response.properties?.find((x) => x.type === 'photo')?.upload)
+  const isUploaded = await uploadCover(photo, response.properties?.find((x) => x.type === 'photo')?.upload)
+
+  if (photo && !isUploaded) {
+    error.value = 'Failed to upload cover!'
+    isAdding.value = false
+    return
+  }
 
   await navigateTo(`${runtimeConfig.public.entuUrl}/${query.account}/${response._id}#edit`, { external: true, open: { target: '_top' } })
 }
@@ -142,13 +148,23 @@ async function getCover (cover) {
   return $fetch('/api/openlibrary/cover', { query: { id: cover }, responseType: 'blob' }).catch(() => null)
 }
 
-async function uploadCover (photo, upload) {
-  if (!photo || !upload) return
+function uploadCover (photo, upload) {
+  return new Promise((resolve) => {
+    if (!photo || !upload) return resolve(false)
 
-  const headers = { ...upload.headers }
-  delete headers['Content-Length']
+    const request = new XMLHttpRequest()
+    request.open(upload.method, upload.url)
 
-  await $fetch(upload.url, { method: upload.method, headers, body: photo }).catch(() => null)
+    for (const header in upload.headers) {
+      if (header.toLowerCase() === 'content-length') continue
+
+      request.setRequestHeader(header, upload.headers[header])
+    }
+
+    request.addEventListener('load', () => resolve(request.status === 200))
+    request.addEventListener('error', () => resolve(false))
+    request.send(photo)
+  })
 }
 
 function getLanguageName (code) {
