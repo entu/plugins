@@ -16,6 +16,15 @@ Search and import data from the Ester library system.
 ### Open Library Import Plugin (`/openlibrary`)
 Search and import book data, including cover images, from the Open Library catalog.
 
+### TMDB Import Plugin (`/tmdb`)
+Search and import movie data, including posters, from The Movie Database.
+
+### MusicBrainz Import Plugin (`/musicbrainz`)
+Search and import music release data, including cover art, from the MusicBrainz database.
+
+### BoardGameGeek Import Plugin (`/bgg`)
+Search and import board game data, including box art, from BoardGameGeek.
+
 ### Template Import Plugin (`/template`)
 Import entity templates and their properties.
 
@@ -39,6 +48,9 @@ All plugins use the same parameter structure:
 /discogs?account=musicdb&type=album&token=xyz789&parent=collection1
 /ester?account=library&type=book&token=def456&locale=en
 /openlibrary?account=library&type=book&token=def456&locale=en
+/tmdb?account=movies&type=film&token=def456&locale=en
+/musicbrainz?account=musicdb&type=album&token=xyz789&locale=en
+/bgg?account=games&type=boardgame&token=abc123&locale=en
 /template?account=myaccount&type=entity&token=abc123&parent=templates&locale=et
 ```
 
