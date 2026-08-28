@@ -20,6 +20,7 @@ export default defineNuxtConfig({
   css: ['~/assets/tailwind.css'],
   spaLoadingTemplate: false,
   runtimeConfig: {
+    bggKey: '',
     discogsKey: '',
     entuKey: '',
     public: {
