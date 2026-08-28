@@ -24,6 +24,7 @@ export default defineNuxtConfig({
     bricksetKey: '',
     discogsKey: '',
     entuKey: '',
+    numistaKey: '',
     tmdbKey: '',
     public: {
       entuApiUrl: '',

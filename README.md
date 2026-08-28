@@ -123,6 +123,25 @@ Search and import music release data, including cover art, from the [MusicBrainz
 | `photo` | Cover art file (from Cover Art Archive) |
 | `year` | Release year |
 
+### Numista Import Plugin (`/numista`)
+Search and import coin and banknote data, including obverse and reverse images, from the [Numista](https://en.numista.com) catalogue.
+
+| Property | Description |
+|---|---|
+| `catalog_number` | Catalogue references (KM, Schön, etc.) |
+| `country` | Issuer |
+| `dimensions` | Diameter |
+| `material` | Composition |
+| `name` | Coin or banknote title |
+| `notes` | Comments |
+| `numista_id` | Numista type ID |
+| `photo` | Obverse and reverse image files |
+| `series` | Series |
+| `shape` | Shape |
+| `value` | Face value |
+| `weight` | Weight |
+| `year` | Years of issue |
+
 ### Open Library Import Plugin (`/openlibrary`)
 Search and import book data, including cover images, from the [Open Library](https://openlibrary.org) catalog.
 
@@ -193,6 +212,7 @@ All plugins use the same parameter structure:
 /ester?account=library&type=book&token=def456&locale=en
 /kml?account=myaccount&type=location&token=abc123&parent=map1&locale=et
 /musicbrainz?account=musicdb&type=album&token=xyz789&locale=en
+/numista?account=coins&type=coin&token=abc123&locale=en
 /openlibrary?account=library&type=book&token=def456&locale=en
 /template?account=myaccount&type=entity&token=abc123&parent=templates&locale=et
 /tmdb?account=movies&type=film&token=def456&locale=en
