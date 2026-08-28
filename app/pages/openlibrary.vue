@@ -1,5 +1,5 @@
 <script setup>
-import { NButton, NInput, NInputGroup, NPagination, NSelect, NSpin, NTable } from 'naive-ui'
+import { NButton, NInput, NInputGroup, NSelect, NSpin, NTable } from 'naive-ui'
 
 const { locale, t } = useI18n()
 const { query } = useRoute()
@@ -14,23 +14,33 @@ const languageFilter = ref(null)
 const isLoading = ref(false)
 const isAdding = ref(false)
 
-const worksPage = ref(1)
-const editionsPage = ref(1)
+const worksListElement = ref(null)
+const editionsListElement = ref(null)
+const worksVisible = ref(20)
+const editionsVisible = ref(20)
 
-const pageSize = 20
+const chunkSize = 20
 const localeLanguages = { en: 'eng', et: 'est' }
 
 const languageOptions = computed(() => [...new Set(editions.value.flatMap((x) => x.language))].map((x) => ({ label: getLanguageName(x), value: x })))
 
 const filteredEditions = computed(() => languageFilter.value ? editions.value.filter((x) => x.language.includes(languageFilter.value)) : editions.value)
 
-const paginatedWorks = computed(() => works.value.slice((worksPage.value - 1) * pageSize, worksPage.value * pageSize))
+const visibleWorks = computed(() => works.value.slice(0, worksVisible.value))
 
-const paginatedEditions = computed(() => filteredEditions.value.slice((editionsPage.value - 1) * pageSize, editionsPage.value * pageSize))
+const visibleEditions = computed(() => filteredEditions.value.slice(0, editionsVisible.value))
 
 watch(languageFilter, () => {
-  editionsPage.value = 1
+  editionsVisible.value = chunkSize
 })
+
+useInfiniteScroll(worksListElement, () => {
+  if (worksVisible.value < works.value.length) worksVisible.value += chunkSize
+}, { distance: 150 })
+
+useInfiniteScroll(editionsListElement, () => {
+  if (editionsVisible.value < filteredEditions.value.length) editionsVisible.value += chunkSize
+}, { distance: 150 })
 
 async function doSearch () {
   if (isLoading.value || !queryString.value) return
@@ -41,8 +51,8 @@ async function doSearch () {
   editions.value = []
   selectedWork.value = null
   languageFilter.value = null
-  worksPage.value = 1
-  editionsPage.value = 1
+  worksVisible.value = chunkSize
+  editionsVisible.value = chunkSize
   works.value = await $fetch('/api/openlibrary', { query: { q: queryString.value } })
 
   isLoading.value = false
@@ -55,7 +65,7 @@ async function doSelectWork (work) {
 
   selectedWork.value = work
   editions.value = []
-  editionsPage.value = 1
+  editionsVisible.value = chunkSize
   const result = await $fetch('/api/openlibrary/editions', { query: { id: work['openlibrary-id']?.[0] } })
   editions.value = result.map((x) => ({ ...x, author: work.author, tag: work.tag }))
 
@@ -69,7 +79,7 @@ function doBack () {
   editions.value = []
   selectedWork.value = null
   languageFilter.value = null
-  editionsPage.value = 1
+  editionsVisible.value = chunkSize
 }
 
 async function doImport (item) {
@@ -229,9 +239,10 @@ onMounted(() => {
 
     <div
       v-if="selectedWork"
+      ref="editionsListElement"
       class="overflow-auto"
     >
-      <div class="mx-4 mb-4 flex items-center justify-between gap-4">
+      <div class="mx-3 mb-4 flex items-center justify-between gap-4">
         <n-button @click="doBack()">
           <template #icon>
             <my-icon icon="chevron-left" />
@@ -258,7 +269,7 @@ onMounted(() => {
       >
         <tbody>
           <tr
-            v-for="item in paginatedEditions"
+            v-for="item in visibleEditions"
             :key="item['openlibrary-id']?.[0]"
           >
             <td class="flex items-start justify-between gap-4">
@@ -300,18 +311,11 @@ onMounted(() => {
           </tr>
         </tbody>
       </n-table>
-
-      <n-pagination
-        v-if="filteredEditions.length > pageSize"
-        v-model:page="editionsPage"
-        class="mx-4 mt-4 justify-center"
-        :item-count="filteredEditions.length"
-        :page-size="pageSize"
-      />
     </div>
 
     <div
       v-else
+      ref="worksListElement"
       class="overflow-auto"
     >
       <n-table
@@ -323,7 +327,7 @@ onMounted(() => {
       >
         <tbody>
           <tr
-            v-for="item in paginatedWorks"
+            v-for="item in visibleWorks"
             :key="item['openlibrary-id']?.[0]"
           >
             <td class="flex items-start justify-between gap-4">
@@ -369,14 +373,6 @@ onMounted(() => {
           </tr>
         </tbody>
       </n-table>
-
-      <n-pagination
-        v-if="works.length > pageSize"
-        v-model:page="worksPage"
-        class="mx-4 mt-4 justify-center"
-        :item-count="works.length"
-        :page-size="pageSize"
-      />
     </div>
   </div>
 </template>
