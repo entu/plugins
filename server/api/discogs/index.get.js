@@ -20,8 +20,6 @@ export default defineEventHandler(async (event) => {
     id: x.id,
     title: x.title,
     year: x.year,
-    country: x.country,
-    format: [...new Set(x.format || [])],
     label: [...new Set(x.label || [])],
     image: x.thumb
   }))

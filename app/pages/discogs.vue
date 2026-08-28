@@ -326,11 +326,8 @@ onMounted(() => {
                 >
                   {{ item.title }}
                 </a>
-                <div>
-                  {{ item.format?.join(', ') }}
-                </div>
                 <div class="italic">
-                  {{ [item.year, item.country].filter(Boolean).join(', ') }}
+                  {{ item.year }}
                 </div>
                 <div>
                   {{ item.label?.join(', ') }}
