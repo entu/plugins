@@ -23,6 +23,7 @@ export default defineNuxtConfig({
     bggKey: '',
     discogsKey: '',
     entuKey: '',
+    tmdbKey: '',
     public: {
       entuApiUrl: '',
       entuUrl: ''
