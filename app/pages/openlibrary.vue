@@ -119,7 +119,7 @@ async function doImport (item) {
     })
   }
 
-  const response = await $fetch(`${runtimeConfig.public.entuApiUrl}/${query.account}/entity`, {
+  const response = await $fetch(`${runtimeConfig.public.entuApiUrl}/${encodeURIComponent(query.account)}/entity`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${query.token}` },
     body: properties.filter((x) => x.type && (x.string || x.reference || x.filename))
@@ -139,7 +139,7 @@ async function doImport (item) {
     return
   }
 
-  await navigateTo(`${runtimeConfig.public.entuUrl}/${query.account}/${response._id}#edit`, { external: true, open: { target: '_top' } })
+  await navigateTo(`${runtimeConfig.public.entuUrl}/${encodeURIComponent(query.account)}/${encodeURIComponent(response._id)}#edit`, { external: true, open: { target: '_top' } })
 }
 
 async function getCover (cover) {
