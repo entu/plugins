@@ -7,7 +7,17 @@ export default defineEventHandler(async (event) => {
 
   setResponseHeader(event, 'Content-Type', 'application/json')
 
-  const { entries } = await $fetch(`https://openlibrary.org/works/${id}/editions.json`, { query: { limit: 100 } })
+  const entries = []
+  let offset = 0
+  let size = Infinity
+
+  while (offset < size && offset < 500) {
+    const result = await $fetch(`https://openlibrary.org/works/${id}/editions.json`, { query: { limit: 100, offset } })
+
+    size = result.size
+    entries.push(...result.entries)
+    offset += 100
+  }
 
   return entries.map((x) => {
     const cover = x.covers?.find((c) => c > 0)

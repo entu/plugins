@@ -9,7 +9,7 @@ export default defineEventHandler(async (event) => {
     query: {
       q,
       fields: 'key,title,subtitle,author_name,first_publish_year,subject,cover_i',
-      limit: 20
+      limit: 100
     }
   })
 

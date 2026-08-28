@@ -1,5 +1,5 @@
 <script setup>
-import { NButton, NInput, NInputGroup, NSelect, NSpin, NTable } from 'naive-ui'
+import { NButton, NInput, NInputGroup, NPagination, NSelect, NSpin, NTable } from 'naive-ui'
 
 const { locale, t } = useI18n()
 const { query } = useRoute()
@@ -14,11 +14,23 @@ const languageFilter = ref(null)
 const isLoading = ref(false)
 const isAdding = ref(false)
 
+const worksPage = ref(1)
+const editionsPage = ref(1)
+
+const pageSize = 20
 const localeLanguages = { en: 'eng', et: 'est' }
 
-const languageOptions = computed(() => [...new Set(editions.value.flatMap((x) => x.language))].map((x) => ({ label: x, value: x })))
+const languageOptions = computed(() => [...new Set(editions.value.flatMap((x) => x.language))].map((x) => ({ label: getLanguageName(x), value: x })))
 
 const filteredEditions = computed(() => languageFilter.value ? editions.value.filter((x) => x.language.includes(languageFilter.value)) : editions.value)
+
+const paginatedWorks = computed(() => works.value.slice((worksPage.value - 1) * pageSize, worksPage.value * pageSize))
+
+const paginatedEditions = computed(() => filteredEditions.value.slice((editionsPage.value - 1) * pageSize, editionsPage.value * pageSize))
+
+watch(languageFilter, () => {
+  editionsPage.value = 1
+})
 
 async function doSearch () {
   if (isLoading.value || !queryString.value) return
@@ -29,6 +41,8 @@ async function doSearch () {
   editions.value = []
   selectedWork.value = null
   languageFilter.value = null
+  worksPage.value = 1
+  editionsPage.value = 1
   works.value = await $fetch('/api/openlibrary', { query: { q: queryString.value } })
 
   isLoading.value = false
@@ -41,6 +55,7 @@ async function doSelectWork (work) {
 
   selectedWork.value = work
   editions.value = []
+  editionsPage.value = 1
   const result = await $fetch('/api/openlibrary/editions', { query: { id: work['openlibrary-id']?.[0] } })
   editions.value = result.map((x) => ({ ...x, author: work.author, tag: work.tag }))
 
@@ -54,6 +69,7 @@ function doBack () {
   editions.value = []
   selectedWork.value = null
   languageFilter.value = null
+  editionsPage.value = 1
 }
 
 async function doImport (item) {
@@ -123,6 +139,15 @@ async function uploadCover (photo, upload) {
   delete headers['Content-Length']
 
   await $fetch(upload.url, { method: upload.method, headers, body: photo }).catch(() => null)
+}
+
+function getLanguageName (code) {
+  try {
+    return new Intl.DisplayNames([locale.value], { type: 'language' }).of(code) || code
+  }
+  catch {
+    return code
+  }
 }
 
 function convertType (type) {
@@ -206,8 +231,12 @@ onMounted(() => {
       v-if="selectedWork"
       class="overflow-auto"
     >
-      <div class="mb-4 flex items-center justify-between gap-4">
+      <div class="mx-4 mb-4 flex items-center justify-between gap-4">
         <n-button @click="doBack()">
+          <template #icon>
+            <my-icon icon="chevron-left" />
+          </template>
+
           {{ t('back') }}
         </n-button>
 
@@ -229,20 +258,17 @@ onMounted(() => {
       >
         <tbody>
           <tr
-            v-for="item in filteredEditions"
+            v-for="item in paginatedEditions"
             :key="item['openlibrary-id']?.[0]"
           >
             <td class="flex items-start justify-between gap-4">
-              <img
-                v-if="item.image"
-                :src="item.image"
-                class="size-16 object-contain"
-              >
-
-              <div
-                v-else
-                class="size-16 shrink-0"
-              />
+              <div class="w-16 shrink-0">
+                <img
+                  v-if="item.image"
+                  :src="item.image"
+                  class="mx-auto max-h-16 max-w-16"
+                >
+              </div>
 
               <div class="grow">
                 <a
@@ -260,7 +286,7 @@ onMounted(() => {
                   {{ [...item['publishing-place'] || [], ...item['publishing-date'] || [], ...item.publisher || []].join(' ') }}
                 </div>
                 <div>
-                  {{ [...item.language || [], ...item.pages || []].join(', ') }}
+                  {{ [...item.language?.map(getLanguageName) || [], ...item.pages || []].join(', ') }}
                 </div>
                 <div>
                   {{ item.isbn?.join(', ') }}
@@ -274,6 +300,14 @@ onMounted(() => {
           </tr>
         </tbody>
       </n-table>
+
+      <n-pagination
+        v-if="filteredEditions.length > pageSize"
+        v-model:page="editionsPage"
+        class="mx-4 mt-4 justify-center"
+        :item-count="filteredEditions.length"
+        :page-size="pageSize"
+      />
     </div>
 
     <div
@@ -289,20 +323,17 @@ onMounted(() => {
       >
         <tbody>
           <tr
-            v-for="item in works"
+            v-for="item in paginatedWorks"
             :key="item['openlibrary-id']?.[0]"
           >
             <td class="flex items-start justify-between gap-4">
-              <img
-                v-if="item.image"
-                :src="item.image"
-                class="size-16 object-contain"
-              >
-
-              <div
-                v-else
-                class="size-16 shrink-0"
-              />
+              <div class="w-16 shrink-0">
+                <img
+                  v-if="item.image"
+                  :src="item.image"
+                  class="mx-auto max-h-16 max-w-16"
+                >
+              </div>
 
               <div class="grow">
                 <a
@@ -324,13 +355,28 @@ onMounted(() => {
                 </div>
               </div>
 
-              <n-button @click="doSelectWork(item)">
+              <n-button
+                icon-placement="right"
+                @click="doSelectWork(item)"
+              >
+                <template #icon>
+                  <my-icon icon="chevron-right" />
+                </template>
+
                 {{ t('editions') }}
               </n-button>
             </td>
           </tr>
         </tbody>
       </n-table>
+
+      <n-pagination
+        v-if="works.length > pageSize"
+        v-model:page="worksPage"
+        class="mx-4 mt-4 justify-center"
+        :item-count="works.length"
+        :page-size="pageSize"
+      />
     </div>
   </div>
 </template>
