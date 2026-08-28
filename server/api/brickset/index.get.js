@@ -7,13 +7,17 @@ export default defineEventHandler(async (event) => {
 
   setResponseHeader(event, 'Content-Type', 'application/json')
 
-  const { sets } = await $fetch('https://brickset.com/api/v3.asmx/getSets', {
-    query: {
-      apiKey: bricksetKey,
-      userHash: '',
-      params: JSON.stringify({ query: q, pageSize: 100 })
-    }
+  const search = new URLSearchParams({
+    apiKey: bricksetKey,
+    userHash: '',
+    params: JSON.stringify({ query: q, pageSize: 500 })
   })
+
+  const { status, message, sets } = await $fetch(`https://brickset.com/api/v3.asmx/getSets?${search}`)
+
+  if (status !== 'success') {
+    throw createError({ statusCode: 502, statusMessage: message || 'Brickset error' })
+  }
 
   return (sets || []).map((x) => ({
     id: `${x.number}-${x.numberVariant}`,
