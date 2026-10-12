@@ -116,7 +116,9 @@ onMounted(async () => {
 })
 
 function convertToMarkdown (description) {
-  if (!description) return { markdown: '', imageUrls: [] }
+  if (!description) {
+    return { markdown: '', imageUrls: [] }
+  }
 
   const imageUrls = []
   const turndownService = createTurndownService(imageUrls)
@@ -129,7 +131,9 @@ function convertToMarkdown (description) {
 }
 
 function convertMarkdownToHtml (markdown) {
-  if (!markdown) return ''
+  if (!markdown) {
+    return ''
+  }
 
   try {
     marked.setOptions({
@@ -188,7 +192,7 @@ function convertUrlsToMarkdownLinks (markdown) {
   return markdown.replace(
     /(^|\s)(https?:\/\/[^\s\n]+)(?=\s|$|\n|\.)/g,
     function (match, p1, p2) {
-      if (match.indexOf('[') !== -1 && match.indexOf('](') !== -1) {
+      if (match.includes('[') && match.includes('](')) {
         return match
       }
       return p1 + '[' + p2 + '](' + p2 + ')'
@@ -252,10 +256,10 @@ async function parseKML () {
       const coordParts = coordinatesText.split(',')
       if (coordParts.length < 2) continue
 
-      const longitude = parseFloat(coordParts[0])
-      const latitude = parseFloat(coordParts[1])
+      const longitude = Number.parseFloat(coordParts[0])
+      const latitude = Number.parseFloat(coordParts[1])
 
-      if (isNaN(longitude) || isNaN(latitude)) continue
+      if (Number.isNaN(longitude) || Number.isNaN(latitude)) continue
 
       const name = placemark.querySelector('name')?.textContent?.trim() || ''
       const rawDescription = placemark.querySelector('description')?.textContent?.trim() || ''
@@ -292,11 +296,11 @@ async function parseKML () {
 }
 
 function handleMasterCheckboxChange (checked) {
-  locations.value.forEach((location) => {
+  for (const location of locations.value) {
     if (!location.imported) {
       location.selected = checked
     }
-  })
+  }
 }
 
 function goBackToUpload () {
@@ -330,12 +334,12 @@ function goBackToUpload () {
 }
 
 function togglePause () {
-  if (importing.value) {
-    paused.value = !paused.value
+  if (!importing.value) return
 
-    if (!paused.value) {
-      importSelected()
-    }
+  paused.value = !paused.value
+
+  if (!paused.value) {
+    importSelected()
   }
 }
 
@@ -399,9 +403,7 @@ async function importSelected () {
     }
 
     for (let i = importProgress.value.current; i < importProgress.value.pendingLocations.length; i++) {
-      if (paused.value) {
-        return
-      }
+      if (paused.value) return
 
       const { location } = importProgress.value.pendingLocations[i]
 
@@ -529,12 +531,12 @@ function buildEntityProperties (entityData) {
   }
 
   if (entityData.properties.imageUrls) {
-    entityData.properties.imageUrls.forEach((url) => {
+    for (const url of entityData.properties.imageUrls) {
       baseProperties.push({
         type: 'pildilingid',
         string: url
       })
-    })
+    }
   }
 
   return baseProperties
@@ -542,7 +544,7 @@ function buildEntityProperties (entityData) {
 
 function processDescription (description) {
   if (description.length > CONTENT_LIMITS.MAX_DESCRIPTION_LENGTH) {
-    return description.substring(0, CONTENT_LIMITS.MAX_DESCRIPTION_LENGTH) + '...'
+    return description.slice(0, Math.max(0, CONTENT_LIMITS.MAX_DESCRIPTION_LENGTH)) + '...'
   }
   return description
 }
@@ -581,9 +583,9 @@ async function sendEntityToEntu (baseProperties) {
     <div v-if="step === STEPS.UPLOAD">
       <n-upload
         v-if="!parsing"
+        accept=".kml,.xml"
         :custom-request="kmlUpload"
         :show-file-list="false"
-        accept=".kml,.xml"
       >
         <n-upload-dragger
           class="flex h-96 flex-col items-center justify-center gap-2 rounded-none"
@@ -654,8 +656,8 @@ async function sendEntityToEntu (baseProperties) {
           <div class="flex items-center gap-2">
             <n-button
               v-if="importCompleteAndSuccessful"
-              type="primary"
               size="small"
+              type="primary"
               :disabled="buttonLock"
               @click="goBackToUpload"
             >
@@ -664,9 +666,9 @@ async function sendEntityToEntu (baseProperties) {
 
             <n-button
               v-else-if="!importing"
-              :disabled="!hasSelectedLocations || buttonLock"
-              type="primary"
               size="small"
+              type="primary"
+              :disabled="!hasSelectedLocations || buttonLock"
               @click="importSelected"
             >
               {{ t('importSelected', selectedCount) }}
@@ -674,8 +676,8 @@ async function sendEntityToEntu (baseProperties) {
 
             <n-button
               v-else
-              type="primary"
               size="small"
+              type="primary"
               @click="togglePauseProtected"
             >
               {{ paused ? t('resumeImport') : t('pauseImport') }}
@@ -689,10 +691,10 @@ async function sendEntityToEntu (baseProperties) {
           class="mb-2 ml-1"
         >
           <n-checkbox
-            :checked="masterCheckboxState.checked"
-            :indeterminate="masterCheckboxState.indeterminate"
             class="mt-1"
             size="small"
+            :checked="masterCheckboxState.checked"
+            :indeterminate="masterCheckboxState.indeterminate"
             @update:checked="handleMasterCheckboxChange"
           >
             <span class="ml-3 text-sm text-gray-600">
@@ -708,12 +710,12 @@ async function sendEntityToEntu (baseProperties) {
         >
           <div class="mt-1 w-80">
             <n-progress
-              type="line"
-              :percentage="importProgress.percentage"
-              :height="16"
-              :border-radius="8"
-              :show-indicator="false"
               status="success"
+              type="line"
+              :border-radius="8"
+              :height="16"
+              :percentage="importProgress.percentage"
+              :show-indicator="false"
             />
           </div>
         </div>
@@ -763,8 +765,8 @@ async function sendEntityToEntu (baseProperties) {
               v-if="!location.imported"
               v-model:checked="location.selected"
               class="mt-1 transition-opacity duration-1000"
-              :class="importing ? 'opacity-0 pointer-events-none' : 'opacity-100'"
               size="small"
+              :class="importing ? 'opacity-0 pointer-events-none' : 'opacity-100'"
             />
 
             <div
@@ -772,17 +774,17 @@ async function sendEntityToEntu (baseProperties) {
               class="mt-0.5 flex size-5 items-center justify-center text-green-600"
             >
               <my-icon
-                icon="check-circle"
                 class="size-5"
+                icon="check-circle"
               />
             </div>
             <div class="ml-3 min-w-0 flex-1 transition-all duration-500 ease-in-out">
               <p class="text-sm font-medium text-gray-900">
                 <a
                   v-if="location.imported"
-                  :href="`${runtimeConfig.public.entuUrl}/${query.account}/${location.entityId}`"
-                  target="_blank"
                   class="text-green-600 hover:text-green-800"
+                  target="_blank"
+                  :href="`${runtimeConfig.public.entuUrl}/${query.account}/${location.entityId}`"
                 >
                   {{ location.name || t('unnamedLocation') }}
                 </a>
@@ -807,9 +809,9 @@ async function sendEntityToEntu (baseProperties) {
                   <!-- v-html safe: content sanitized through HTML→Markdown→HTML pipeline -->
                   <!-- eslint-disable vue/no-v-html -->
                   <div
-                    class="prose prose-sm mt-1 max-w-none overflow-y-auto text-gray-600 [&>p:first-child]:mt-0 [&>p:last-child]:mb-0 [&>p]:my-2 [&_a]:break-words [&_a]:text-blue-600 [&_a]:underline hover:[&_a]:text-blue-800 [&_img]:h-auto [&_img]:max-w-full"
-                    :style="{ maxHeight: `${CONTENT_LIMITS.MAX_DESCRIPTION_HEIGHT}px` }"
                     v-html="location.htmlDescription"
+                    class="prose prose-sm mt-1 max-w-none overflow-y-auto text-gray-600 [&_a]:wrap-break-word [&_a]:text-blue-600 [&_a]:underline hover:[&_a]:text-blue-800 [&_img]:h-auto [&_img]:max-w-full [&>p]:my-2 [&>p:first-child]:mt-0 [&>p:last-child]:mb-0"
+                    :style="{ maxHeight: `${CONTENT_LIMITS.MAX_DESCRIPTION_HEIGHT}px` }"
                   />
                 </div>
               </div>
@@ -827,8 +829,8 @@ async function sendEntityToEntu (baseProperties) {
       <div class="flex">
         <div class="shrink-0">
           <my-icon
-            icon="error-circle"
             class="size-5 text-red-400"
+            icon="error-circle"
           />
         </div>
         <div class="ml-3">

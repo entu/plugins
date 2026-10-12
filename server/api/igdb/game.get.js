@@ -32,7 +32,9 @@ export default defineEventHandler(async (event) => {
 })
 
 async function getCover (imageId) {
-  if (!/^[\w]+$/.test(imageId || '')) return null
+  if (!/^[\w]+$/.test(imageId || '')) {
+    return null
+  }
 
   const cover = await $fetch(`https://images.igdb.com/igdb/image/upload/t_cover_big/${imageId}.jpg`, { responseType: 'arrayBuffer' }).catch(() => null)
 

@@ -37,7 +37,9 @@ export default defineEventHandler(async (event) => {
 })
 
 async function getCover (posterPath) {
-  if (!/^\/[\w.-]+$/.test(posterPath || '')) return null
+  if (!/^\/[\w.-]+$/.test(posterPath || '')) {
+    return null
+  }
 
   const cover = await $fetch(`https://image.tmdb.org/t/p/w780${posterPath}`, { responseType: 'arrayBuffer' }).catch(() => null)
 

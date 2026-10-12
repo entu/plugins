@@ -51,7 +51,9 @@ function getLinks (data, type) {
 }
 
 async function getCover (image) {
-  if (!image?.startsWith('https://cf.geekdo-images.com/')) return null
+  if (!image?.startsWith('https://cf.geekdo-images.com/')) {
+    return null
+  }
 
   const cover = await $fetch(image, { responseType: 'arrayBuffer' }).catch(() => null)
 
@@ -59,7 +61,9 @@ async function getCover (image) {
 }
 
 function toArray (value) {
-  if (!value) return []
+  if (!value) {
+    return []
+  }
 
   return Array.isArray(value) ? value : [value]
 }

@@ -18,7 +18,7 @@ const templateEntitiesOptions = computed(() => {
   const notImported = []
   const alreadyImported = []
 
-  templateEntities.value?.forEach((x) => {
+  for (const x of templateEntities.value ?? []) {
     const isImported = existingTypes.value?.some((e) => e.name === x._type)
     const option = { label: x.label, value: x._id }
 
@@ -28,7 +28,7 @@ const templateEntitiesOptions = computed(() => {
     else {
       notImported.push(option)
     }
-  })
+  }
 
   notImported.sort((a, b) => a.label.localeCompare(b.label))
   alreadyImported.sort((a, b) => a.label.localeCompare(b.label))
@@ -51,9 +51,9 @@ const allChecked = computed({
     return templateProperties.value?.filter((x) => !x.alreadyImported)?.every((x) => x.selected)
   },
   set: (value) => {
-    templateProperties.value
-      ?.filter((x) => !x.newId && !x.alreadyImported)
-      ?.forEach((x) => { x.selected = value })
+    for (const x of templateProperties.value?.filter((x) => !x.newId && !x.alreadyImported) ?? []) {
+      x.selected = value
+    }
   }
 })
 
@@ -131,8 +131,12 @@ async function getTemplateProperties (entityId) {
   }))
 
   properties.sort((a, b) => {
-    if (a.ordinal === b.ordinal) return 0
-    if (a.ordinal > b.ordinal) return 1
+    if (a.ordinal === b.ordinal) {
+      return 0
+    }
+    if (a.ordinal > b.ordinal) {
+      return 1
+    }
     return -1
   })
 
@@ -341,8 +345,6 @@ onMounted(async () => {
 </script>
 
 <template>
-  <!-- <pre class="mt-8 overflow-auto text-xs">{{ selectedPropertyIds }}</pre> -->
-
   <div
     v-if="error"
     class="flex h-full max-h-full items-center justify-center font-bold text-red-700"
@@ -354,6 +356,8 @@ onMounted(async () => {
     v-else
     class="flex h-full max-h-full flex-col gap-6 overflow-auto p-6"
   >
+    <!-- <pre class="mt-8 overflow-auto text-xs">{{ selectedPropertyIds }}</pre> -->
+
     <div class="text-gray-600">
       {{ t('description') }}
     </div>
@@ -410,8 +414,8 @@ onMounted(async () => {
         <template v-if="newProperties.length">
           <tr>
             <td
+              class="bg-gray-50 px-3 py-1 text-xs font-semibold text-gray-500 uppercase"
               colspan="5"
-              class="bg-gray-50 px-3 py-1 text-xs font-semibold uppercase text-gray-500"
             >
               {{ t('groupNotImported') }}
             </td>
@@ -459,8 +463,8 @@ onMounted(async () => {
         <template v-if="existingProperties.length">
           <tr>
             <td
+              class="bg-gray-50 px-3 py-1 text-xs font-semibold text-gray-500 uppercase"
               colspan="5"
-              class="bg-gray-50 px-3 py-1 text-xs font-semibold uppercase text-gray-500"
             >
               {{ t('groupAlreadyImported') }}
             </td>

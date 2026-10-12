@@ -8,7 +8,9 @@ const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '' 
 export default defineEventHandler(async (event) => {
   const { q } = getQuery(event)
 
-  if (!q) return []
+  if (!q) {
+    return []
+  }
 
   setResponseHeader(event, 'Content-Type', 'application/json')
 
@@ -18,9 +20,12 @@ export default defineEventHandler(async (event) => {
     responseType: 'text'
   })
 
-  const found = toArray(parser.parse(searchXml).items?.item).slice(0, 30)
+  // BGG thing endpoint rejects more than 20 ids per request.
+  const found = toArray(parser.parse(searchXml).items?.item).slice(0, 20)
 
-  if (found.length === 0) return []
+  if (found.length === 0) {
+    return []
+  }
 
   const thingsXml = await $fetch('https://boardgamegeek.com/xmlapi2/thing', {
     headers,
@@ -37,7 +42,9 @@ export default defineEventHandler(async (event) => {
 })
 
 function toArray (value) {
-  if (!value) return []
+  if (!value) {
+    return []
+  }
 
   return Array.isArray(value) ? value : [value]
 }

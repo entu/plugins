@@ -44,7 +44,9 @@ async function getCover (url) {
   try {
     const { protocol, hostname } = new URL(url)
 
-    if (protocol !== 'https:' || (hostname !== 'numista.com' && !hostname.endsWith('.numista.com'))) return null
+    if (protocol !== 'https:' || (hostname !== 'numista.com' && !hostname.endsWith('.numista.com'))) {
+      return null
+    }
   }
   catch {
     return null

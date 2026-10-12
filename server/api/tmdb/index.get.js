@@ -3,7 +3,9 @@ const { tmdbKey } = useRuntimeConfig()
 export default defineEventHandler(async (event) => {
   const { q, l } = getQuery(event)
 
-  if (!q) return []
+  if (!q) {
+    return []
+  }
 
   setResponseHeader(event, 'Content-Type', 'application/json')
 

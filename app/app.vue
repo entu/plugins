@@ -6,10 +6,10 @@ const currentLocale = ref(enUS)
 const currentDateLocale = ref(dateEnUS)
 
 onMounted(() => {
-  if (query.locale === 'et') {
-    currentLocale.value = etEE
-    currentDateLocale.value = dateEtEE
-  }
+  if (query.locale !== 'et') return
+
+  currentLocale.value = etEE
+  currentDateLocale.value = dateEtEE
 })
 </script>
 
@@ -17,8 +17,8 @@ onMounted(() => {
   <n-config-provider
     class="h-full"
     inline-theme-disabled
-    :locale="currentLocale"
     :date-locale="currentDateLocale"
+    :locale="currentLocale"
     :theme-overrides="themeOverrides"
   >
     <nuxt-page />

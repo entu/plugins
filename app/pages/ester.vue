@@ -150,10 +150,10 @@ onMounted(() => {
     <div class="overflow-auto">
       <n-table
         v-if="esterItems.length > 0"
+        striped
         :bordered="false"
         :bottom-bordered="false"
         :single-line="false"
-        :striped="true"
       >
         <tbody>
           <tr

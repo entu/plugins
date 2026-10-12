@@ -11,7 +11,7 @@ const types = ref([])
 const isLoading = ref(false)
 const isAdding = ref(false)
 
-const typesListElement = ref(null)
+const typesListElement = useTemplateRef('typesListElement')
 const typesVisible = ref(20)
 
 const chunkSize = 20
@@ -19,7 +19,9 @@ const chunkSize = 20
 const visibleTypes = computed(() => types.value.slice(0, typesVisible.value))
 
 useInfiniteScroll(typesListElement, () => {
-  if (typesVisible.value < types.value.length) typesVisible.value += chunkSize
+  if (typesVisible.value < types.value.length) {
+    typesVisible.value += chunkSize
+  }
 }, { distance: 150 })
 
 async function doSearch () {
@@ -98,7 +100,9 @@ async function doImport (item) {
 }
 
 function getCoverBlob (cover) {
-  if (!cover) return null
+  if (!cover) {
+    return null
+  }
 
   const bytes = Uint8Array.from(atob(cover), (c) => c.charCodeAt(0))
 
@@ -107,7 +111,9 @@ function getCoverBlob (cover) {
 
 function uploadCover (photo, upload) {
   return new Promise((resolve) => {
-    if (!photo || !upload) return resolve(false)
+    if (!photo || !upload) {
+      return resolve(false)
+    }
 
     const request = new XMLHttpRequest()
     request.open(upload.method, upload.url)
@@ -193,10 +199,10 @@ onMounted(() => {
     >
       <n-table
         v-if="visibleTypes.length > 0"
+        striped
         :bordered="false"
         :bottom-bordered="false"
         :single-line="false"
-        :striped="true"
       >
         <tbody>
           <tr
@@ -207,8 +213,8 @@ onMounted(() => {
               <div class="w-16 shrink-0">
                 <img
                   v-if="item.image"
-                  :src="item.image"
                   class="mx-auto max-h-16 max-w-16"
+                  :src="item.image"
                 >
               </div>
 

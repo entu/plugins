@@ -61,9 +61,9 @@ const allChecked = computed({
     return csvContent.value?.every((x) => x.selected)
   },
   set: (value) => {
-    csvContent.value
-      ?.filter((x) => !x._id)
-      ?.forEach((x) => { x.selected = value })
+    for (const x of csvContent.value?.filter((x) => !x._id) ?? []) {
+      x.selected = value
+    }
   }
 })
 
@@ -92,7 +92,9 @@ watch([file, encoding], ([fileValue, encodingValue]) => {
 
   reader.onload = (e) => {
     parse(e.target.result, {
-      complete: ({ data }) => { parseCsv(data) },
+      complete: ({ data }) => {
+        parseCsv(data)
+      },
       dynamicTyping: true,
       skipEmptyLines: 'greedy'
     })
@@ -168,9 +170,9 @@ async function doImport () {
 
   const entities = []
 
-  csvContent.value.forEach((row, index) => {
-    if (row._id) return
-    if (!row.selected) return
+  for (const [index, row] of csvContent.value.entries()) {
+    if (row._id) continue
+    if (!row.selected) continue
 
     const properties = [
       { type: '_type', reference: query.type }
@@ -180,22 +182,22 @@ async function doImport () {
       properties.push({ type: '_parent', reference: query.parent })
     }
 
-    row.data.forEach((value, i) => {
+    for (const [i, value] of row.data.entries()) {
       const property = selectedProperties.value[i]
 
-      if (!property) return
+      if (!property) continue
 
       const datatype = propertyOptions.value.find((x) => x.value === property)?.type
 
-      if (!datatype) return
+      if (!datatype) continue
 
-      if (value === null || value === undefined) return
+      if (value === null || value === undefined) continue
 
       properties.push({ type: property, [datatype]: convertValue(datatype, value) })
-    })
+    }
 
     entities.push({ index, properties })
-  })
+  }
 
   for (let i = 0; i < entities.length; i++) {
     const entity = entities[i]
@@ -339,8 +341,8 @@ onMounted(() => {
             <nuxt-link
               v-if="row._id"
               class="block w-full p-3 text-green-700"
-              :to="`${runtimeConfig.public.entuUrl}/${query.account}/${row._id}#edit`"
               target="_blank"
+              :to="`${runtimeConfig.public.entuUrl}/${query.account}/${row._id}#edit`"
             >
               {{ column }}
             </nuxt-link>

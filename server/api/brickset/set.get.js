@@ -59,7 +59,9 @@ function getDimensions (dimensions) {
 }
 
 async function getCover (image) {
-  if (!image?.startsWith('https://images.brickset.com/')) return null
+  if (!image?.startsWith('https://images.brickset.com/')) {
+    return null
+  }
 
   const cover = await $fetch(image, { responseType: 'arrayBuffer' }).catch(() => null)
 

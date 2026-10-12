@@ -13,8 +13,8 @@ const { t } = useI18n()
 const canScan = ref(false)
 const isScannerOpen = ref(false)
 const scanError = ref(null)
-const video = ref(null)
-const photoInput = ref(null)
+const video = useTemplateRef('video')
+const photoInput = useTemplateRef('photoInput')
 
 let barcodeDetector = null
 let mediaStream = null
@@ -112,12 +112,16 @@ function stopScanner () {
   clearInterval(detectTimer)
   detectTimer = null
 
-  mediaStream?.getTracks().forEach((x) => x.stop())
+  for (const x of mediaStream?.getTracks() ?? []) {
+    x.stop()
+  }
   mediaStream = null
 }
 
 watch(isScannerOpen, (value) => {
-  if (!value) stopScanner()
+  if (!value) {
+    stopScanner()
+  }
 })
 
 onMounted(() => {
@@ -144,8 +148,8 @@ onBeforeUnmount(() => {
 
   <n-modal
     v-model:show="isScannerOpen"
-    preset="card"
     class="max-w-96"
+    preset="card"
     :title="t('scanBarcode')"
   >
     <div class="flex flex-col gap-4">
@@ -160,9 +164,9 @@ onBeforeUnmount(() => {
         v-show="!scanError"
         ref="video"
         autoplay
+        class="w-full rounded"
         muted
         playsinline
-        class="w-full rounded"
       />
 
       <div

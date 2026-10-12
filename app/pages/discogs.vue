@@ -13,8 +13,8 @@ const selectedMaster = ref(null)
 const isLoading = ref(false)
 const isAdding = ref(false)
 
-const mastersListElement = ref(null)
-const releasesListElement = ref(null)
+const mastersListElement = useTemplateRef('mastersListElement')
+const releasesListElement = useTemplateRef('releasesListElement')
 const mastersVisible = ref(20)
 const releasesVisible = ref(20)
 
@@ -25,11 +25,15 @@ const visibleMasters = computed(() => masters.value.slice(0, mastersVisible.valu
 const visibleReleases = computed(() => releases.value.slice(0, releasesVisible.value))
 
 useInfiniteScroll(mastersListElement, () => {
-  if (mastersVisible.value < masters.value.length) mastersVisible.value += chunkSize
+  if (mastersVisible.value < masters.value.length) {
+    mastersVisible.value += chunkSize
+  }
 }, { distance: 150 })
 
 useInfiniteScroll(releasesListElement, () => {
-  if (releasesVisible.value < releases.value.length) releasesVisible.value += chunkSize
+  if (releasesVisible.value < releases.value.length) {
+    releasesVisible.value += chunkSize
+  }
 }, { distance: 150 })
 
 async function doSearch () {
@@ -127,7 +131,9 @@ async function doImport (item) {
 }
 
 function getCoverBlob (cover) {
-  if (!cover) return null
+  if (!cover) {
+    return null
+  }
 
   const bytes = Uint8Array.from(atob(cover), (c) => c.charCodeAt(0))
 
@@ -136,7 +142,9 @@ function getCoverBlob (cover) {
 
 function uploadCover (photo, upload) {
   return new Promise((resolve) => {
-    if (!photo || !upload) return resolve(false)
+    if (!photo || !upload) {
+      return resolve(false)
+    }
 
     const request = new XMLHttpRequest()
     request.open(upload.method, upload.url)
@@ -243,10 +251,10 @@ onMounted(() => {
 
       <n-table
         v-if="visibleReleases.length > 0"
+        striped
         :bordered="false"
         :bottom-bordered="false"
         :single-line="false"
-        :striped="true"
       >
         <tbody>
           <tr
@@ -257,8 +265,8 @@ onMounted(() => {
               <div class="w-16 shrink-0">
                 <img
                   v-if="item.image"
-                  :src="item.image"
                   class="mx-auto max-h-16 max-w-16"
+                  :src="item.image"
                 >
               </div>
 
@@ -298,10 +306,10 @@ onMounted(() => {
     >
       <n-table
         v-if="visibleMasters.length > 0"
+        striped
         :bordered="false"
         :bottom-bordered="false"
         :single-line="false"
-        :striped="true"
       >
         <tbody>
           <tr
@@ -312,8 +320,8 @@ onMounted(() => {
               <div class="w-16 shrink-0">
                 <img
                   v-if="item.image"
-                  :src="item.image"
                   class="mx-auto max-h-16 max-w-16"
+                  :src="item.image"
                 >
               </div>
 

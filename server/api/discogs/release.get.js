@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
       label: [...new Set(data.labels?.map((x) => x.name))],
       catalog_number: [...new Set(data.labels?.map((x) => x.catno).filter((x) => x && x.toLowerCase() !== 'none'))],
       company: [...new Set(data.companies?.map((x) => x.name))],
-      format: [...new Set(data.formats?.map((x) => [x.name, ...x.descriptions]).flat())],
+      format: [...new Set(data.formats?.flatMap((x) => [x.name, ...x.descriptions]))],
       title: [data.title],
       country: [data.country],
       notes: [data.notes],
@@ -36,7 +36,9 @@ export default defineEventHandler(async (event) => {
 async function getCover (data) {
   const image = data.images?.find((x) => x.type === 'primary') || data.images?.at(0)
 
-  if (!image?.uri?.startsWith('https://i.discogs.com/')) return null
+  if (!image?.uri?.startsWith('https://i.discogs.com/')) {
+    return null
+  }
 
   const cover = await $fetch(image.uri, { responseType: 'arrayBuffer', headers: { 'User-Agent': 'EntuPlugins/1.0' } }).catch(() => null)
 
