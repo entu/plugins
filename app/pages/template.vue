@@ -347,7 +347,7 @@ onMounted(async () => {
 <template>
   <div
     v-if="error"
-    class="flex h-full max-h-full items-center justify-center font-bold text-red-700"
+    class="flex h-full max-h-full items-center justify-center font-bold text-red-600"
   >
     {{ error }}
   </div>

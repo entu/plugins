@@ -254,7 +254,7 @@ onMounted(() => {
 <template>
   <div
     v-if="error"
-    class="flex h-full max-h-full items-center justify-center font-bold text-red-700"
+    class="flex h-full max-h-full items-center justify-center font-bold text-red-600"
   >
     {{ error }}
   </div>
@@ -340,7 +340,7 @@ onMounted(() => {
           >
             <nuxt-link
               v-if="row._id"
-              class="block w-full p-3 text-green-700"
+              class="block w-full p-3 text-green-600"
               target="_blank"
               :to="`${runtimeConfig.public.entuUrl}/${query.account}/${row._id}#edit`"
             >

@@ -171,7 +171,7 @@ onBeforeUnmount(() => {
 
       <div
         v-if="scanError"
-        class="text-red-700"
+        class="text-red-600"
       >
         {{ scanError }}
       </div>

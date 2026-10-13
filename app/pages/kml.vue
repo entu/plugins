@@ -570,7 +570,7 @@ async function sendEntityToEntu (baseProperties) {
 <template>
   <div
     v-if="error"
-    class="flex h-full max-h-full items-center justify-center font-bold text-red-700"
+    class="flex h-full max-h-full items-center justify-center font-bold text-red-600"
   >
     {{ error }}
   </div>
@@ -725,14 +725,14 @@ async function sendEntityToEntu (baseProperties) {
           v-if="importResults.errors.length > 0"
           class="mb-2 rounded-md border border-red-200 bg-red-50 p-2"
         >
-          <h3 class="mb-1 text-sm font-medium text-red-800">
+          <h3 class="mb-1 text-sm font-medium text-red-600">
             {{ t('importErrors', importResults.errors.length) }}
           </h3>
           <ul class="list-inside list-disc space-y-1">
             <li
               v-for="errorItem in importResults.errors"
               :key="errorItem.name"
-              class="text-sm text-red-700"
+              class="text-sm text-red-600"
             >
               {{ errorItem.name || t('unnamedLocation') }}: {{ errorItem.error }}
             </li>
@@ -742,7 +742,7 @@ async function sendEntityToEntu (baseProperties) {
             v-if="importResults.stopped"
             class="mt-2"
           >
-            <p class="text-sm text-yellow-800">
+            <p class="text-sm text-yellow-600">
               {{ t('importStoppedMessage', { skipped: importResults.skipped }) }}
             </p>
           </div>
@@ -758,7 +758,7 @@ async function sendEntityToEntu (baseProperties) {
             class="flex items-start border-b border-slate-100 p-3 transition-all duration-500 ease-in-out last:border-b-0"
             :class="{
               'bg-green-50': location.imported,
-              'border-green-100': location.imported,
+              'border-green-200': location.imported,
             }"
           >
             <n-checkbox
@@ -782,7 +782,7 @@ async function sendEntityToEntu (baseProperties) {
               <p class="text-sm font-medium text-slate-900">
                 <a
                   v-if="location.imported"
-                  class="text-green-600 hover:text-green-800"
+                  class="text-green-600"
                   target="_blank"
                   :href="`${runtimeConfig.public.entuUrl}/${query.account}/${location.entityId}`"
                 >
@@ -790,7 +790,7 @@ async function sendEntityToEntu (baseProperties) {
                 </a>
                 <span
                   v-else
-                  class="cursor-pointer hover:text-blue-600"
+                  class="cursor-pointer hover:text-blue-900"
                   @click="!importing && (location.selected = !location.selected)"
                 >
                   {{ location.name || t('unnamedLocation') }}
@@ -810,7 +810,7 @@ async function sendEntityToEntu (baseProperties) {
                   <!-- eslint-disable vue/no-v-html -->
                   <div
                     v-html="location.htmlDescription"
-                    class="prose prose-sm mt-1 max-w-none overflow-y-auto text-slate-600 [&_a]:wrap-break-word [&_a]:text-blue-600 [&_a]:underline hover:[&_a]:text-blue-800 [&_img]:h-auto [&_img]:max-w-full [&>p]:my-2 [&>p:first-child]:mt-0 [&>p:last-child]:mb-0"
+                    class="prose prose-sm mt-1 max-w-none overflow-y-auto text-slate-600 [&_a]:wrap-break-word [&_a]:text-blue-900 [&_a]:underline [&_img]:h-auto [&_img]:max-w-full [&>p]:my-2 [&>p:first-child]:mt-0 [&>p:last-child]:mb-0"
                     :style="{ maxHeight: `${CONTENT_LIMITS.MAX_DESCRIPTION_HEIGHT}px` }"
                   />
                 </div>
@@ -829,15 +829,15 @@ async function sendEntityToEntu (baseProperties) {
       <div class="flex">
         <div class="shrink-0">
           <my-icon
-            class="size-5 text-red-400"
+            class="size-5 text-red-600"
             icon="error-circle"
           />
         </div>
         <div class="ml-3">
-          <h3 class="text-sm font-medium text-red-800">
+          <h3 class="text-sm font-medium text-red-600">
             {{ t('error') }}
           </h3>
-          <div class="mt-2 text-sm text-red-700">
+          <div class="mt-2 text-sm text-red-600">
             <p>{{ error }}</p>
           </div>
         </div>
