@@ -358,7 +358,7 @@ onMounted(async () => {
   >
     <!-- <pre class="mt-8 overflow-auto text-xs">{{ selectedPropertyIds }}</pre> -->
 
-    <div class="text-gray-600">
+    <div class="text-slate-600">
       {{ t('description') }}
     </div>
     <div
@@ -391,22 +391,22 @@ onMounted(async () => {
         </tr>
 
         <tr>
-          <th class="bg-gray-100 p-3 text-left">
+          <th class="bg-slate-100 p-3 text-left">
             <n-checkbox
               v-model:checked="allChecked"
               :indeterminate="someChecked"
             />
           </th>
-          <th class="bg-gray-100 p-3 text-left">
+          <th class="bg-slate-100 p-3 text-left">
             {{ t('name') }}
           </th>
-          <th class="w-full bg-gray-100 p-3 text-left">
+          <th class="w-full bg-slate-100 p-3 text-left">
             {{ t('label') }}
           </th>
-          <th class="bg-gray-100 p-3 text-left">
+          <th class="bg-slate-100 p-3 text-left">
             {{ t('type') }}
           </th>
-          <th class="w-32 bg-gray-100 p-3 text-left" />
+          <th class="w-32 bg-slate-100 p-3 text-left" />
         </tr>
       </thead>
 
@@ -414,7 +414,7 @@ onMounted(async () => {
         <template v-if="newProperties.length">
           <tr>
             <td
-              class="bg-gray-50 px-3 py-1 text-xs font-semibold text-gray-500 uppercase"
+              class="bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-500 uppercase"
               colspan="5"
             >
               {{ t('groupNotImported') }}
@@ -423,7 +423,7 @@ onMounted(async () => {
           <tr
             v-for="templateProperty in newProperties"
             :key="templateProperty._id"
-            class="group border-t border-gray-200 hover:bg-gray-50"
+            class="group border-t border-slate-200 hover:bg-slate-50"
           >
             <td class="p-3">
               <n-checkbox
@@ -443,17 +443,17 @@ onMounted(async () => {
             <td class="w-32 p-3 text-sm">
               <my-icon
                 v-if="templateProperty._sharing === 'public'"
-                class="text-gray-500 group-hover:text-orange-600"
+                class="text-slate-500 group-hover:text-orange-600"
                 icon="sharing-public"
               />
               <my-icon
                 v-else-if="templateProperty._sharing === 'domain'"
-                class="text-gray-500 group-hover:text-yellow-600"
+                class="text-slate-500 group-hover:text-yellow-600"
                 icon="sharing-domain"
               />
               <my-icon
                 v-else
-                class="text-gray-500 group-hover:text-green-600"
+                class="text-slate-500 group-hover:text-green-600"
                 icon="sharing-private"
               />
             </td>
@@ -463,7 +463,7 @@ onMounted(async () => {
         <template v-if="existingProperties.length">
           <tr>
             <td
-              class="bg-gray-50 px-3 py-1 text-xs font-semibold text-gray-500 uppercase"
+              class="bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-500 uppercase"
               colspan="5"
             >
               {{ t('groupAlreadyImported') }}
@@ -472,7 +472,7 @@ onMounted(async () => {
           <tr
             v-for="templateProperty in existingProperties"
             :key="templateProperty._id"
-            class="group border-t border-gray-200 hover:bg-gray-50"
+            class="group border-t border-slate-200 hover:bg-slate-50"
           >
             <td class="p-3">
               <n-checkbox
@@ -492,17 +492,17 @@ onMounted(async () => {
             <td class="w-32 p-3 text-sm">
               <my-icon
                 v-if="templateProperty._sharing === 'public'"
-                class="text-gray-500 group-hover:text-orange-600"
+                class="text-slate-500 group-hover:text-orange-600"
                 icon="sharing-public"
               />
               <my-icon
                 v-else-if="templateProperty._sharing === 'domain'"
-                class="text-gray-500 group-hover:text-yellow-600"
+                class="text-slate-500 group-hover:text-yellow-600"
                 icon="sharing-domain"
               />
               <my-icon
                 v-else
-                class="text-gray-500 group-hover:text-green-600"
+                class="text-slate-500 group-hover:text-green-600"
                 icon="sharing-private"
               />
             </td>

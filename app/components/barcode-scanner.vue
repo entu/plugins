@@ -155,7 +155,7 @@ onBeforeUnmount(() => {
     <div class="flex flex-col gap-4">
       <div
         v-show="!scanError"
-        class="text-center text-sm text-gray-500"
+        class="text-center text-sm text-slate-500"
       >
         {{ t('scanInfo') }}
       </div>

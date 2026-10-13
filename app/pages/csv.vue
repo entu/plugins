@@ -299,7 +299,7 @@ onMounted(() => {
         </tr>
 
         <tr>
-          <th class="bg-gray-100 p-3 text-left">
+          <th class="bg-slate-100 p-3 text-left">
             <n-checkbox
               v-model:checked="allChecked"
               :indeterminate="someChecked"
@@ -308,7 +308,7 @@ onMounted(() => {
           <th
             v-for="(column, index) in csvContent.at(0).data"
             :key="index"
-            class="bg-gray-100 p-3 text-left"
+            class="bg-slate-100 p-3 text-left"
             :title="column"
           >
             <n-select
@@ -325,7 +325,7 @@ onMounted(() => {
         <tr
           v-for="(row, rowIndex) in csvContent"
           :key="rowIndex"
-          class="group border-t border-gray-200 hover:bg-gray-50"
+          class="group border-t border-slate-200 hover:bg-slate-50"
         >
           <td class="p-3">
             <n-checkbox

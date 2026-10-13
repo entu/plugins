@@ -608,9 +608,9 @@ async function sendEntityToEntu (baseProperties) {
       class="flex h-full flex-col"
     >
       <!-- Sticky header with controls -->
-      <div class="sticky top-0 z-10 border-b border-gray-200 p-2">
+      <div class="sticky top-0 z-10 border-b border-slate-200 p-2">
         <div class="mb-3 flex items-center justify-between">
-          <h2 class="text-xl font-semibold text-gray-900">
+          <h2 class="text-xl font-semibold text-slate-900">
             {{ importing ? t('importing') : importCompleteAndSuccessful ? t('importComplete') : t('reviewLocations') }}
           </h2>
           <n-button
@@ -634,21 +634,21 @@ async function sendEntityToEntu (baseProperties) {
 
           <p
             v-else-if="!importing"
-            class="text-sm text-gray-600"
+            class="text-sm text-slate-600"
           >
             {{ t('foundLocations', locations.length) }}
           </p>
 
           <p
             v-else-if="importing && !paused"
-            class="text-sm text-gray-600"
+            class="text-sm text-slate-600"
           >
             {{ t('importingProgress', { current: importProgress.current, total: importProgress.total, percentage: importProgress.percentage }) }}
           </p>
 
           <p
             v-else-if="importing && paused"
-            class="text-sm text-gray-600"
+            class="text-sm text-slate-600"
           >
             {{ t('importPaused', { current: importProgress.current, total: importProgress.total, percentage: importProgress.percentage }) }}
           </p>
@@ -697,7 +697,7 @@ async function sendEntityToEntu (baseProperties) {
             :indeterminate="masterCheckboxState.indeterminate"
             @update:checked="handleMasterCheckboxChange"
           >
-            <span class="ml-3 text-sm text-gray-600">
+            <span class="ml-3 text-sm text-slate-600">
               {{ t('selectAll') }}
             </span>
           </n-checkbox>
@@ -755,7 +755,7 @@ async function sendEntityToEntu (baseProperties) {
           <div
             v-for="location in locations"
             :key="`${location.coordinates[0]}-${location.coordinates[1]}-${location.name}`"
-            class="flex items-start border-b border-gray-100 p-3 transition-all duration-500 ease-in-out last:border-b-0"
+            class="flex items-start border-b border-slate-100 p-3 transition-all duration-500 ease-in-out last:border-b-0"
             :class="{
               'bg-green-50': location.imported,
               'border-green-100': location.imported,
@@ -779,7 +779,7 @@ async function sendEntityToEntu (baseProperties) {
               />
             </div>
             <div class="ml-3 min-w-0 flex-1 transition-all duration-500 ease-in-out">
-              <p class="text-sm font-medium text-gray-900">
+              <p class="text-sm font-medium text-slate-900">
                 <a
                   v-if="location.imported"
                   class="text-green-600 hover:text-green-800"
@@ -795,7 +795,7 @@ async function sendEntityToEntu (baseProperties) {
                 >
                   {{ location.name || t('unnamedLocation') }}
                 </span>
-                <span class="ml-1 text-sm text-gray-500">
+                <span class="ml-1 text-sm text-slate-500">
                   {{ location.coordinates[1].toFixed(COORDINATE_VALIDATION.COORDINATE_PRECISION) }}, {{ location.coordinates[0].toFixed(COORDINATE_VALIDATION.COORDINATE_PRECISION) }}
                 </span>
               </p>
@@ -810,7 +810,7 @@ async function sendEntityToEntu (baseProperties) {
                   <!-- eslint-disable vue/no-v-html -->
                   <div
                     v-html="location.htmlDescription"
-                    class="prose prose-sm mt-1 max-w-none overflow-y-auto text-gray-600 [&_a]:wrap-break-word [&_a]:text-blue-600 [&_a]:underline hover:[&_a]:text-blue-800 [&_img]:h-auto [&_img]:max-w-full [&>p]:my-2 [&>p:first-child]:mt-0 [&>p:last-child]:mb-0"
+                    class="prose prose-sm mt-1 max-w-none overflow-y-auto text-slate-600 [&_a]:wrap-break-word [&_a]:text-blue-600 [&_a]:underline hover:[&_a]:text-blue-800 [&_img]:h-auto [&_img]:max-w-full [&>p]:my-2 [&>p:first-child]:mt-0 [&>p:last-child]:mb-0"
                     :style="{ maxHeight: `${CONTENT_LIMITS.MAX_DESCRIPTION_HEIGHT}px` }"
                   />
                 </div>
