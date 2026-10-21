@@ -1,7 +1,7 @@
 <script setup>
 import jschardet from 'jschardet'
 import { parse } from 'papaparse'
-import { NButton, NCheckbox, NForm, NFormItem, NSelect, NSpin, NUpload, NUploadDragger } from 'naive-ui'
+import { NButton, NCheckbox, NForm, NFormItem, NPopconfirm, NRadio, NRadioGroup, NSelect, NSpin, NUpload, NUploadDragger } from 'naive-ui'
 
 const { locale, t } = useI18n()
 const { query } = useRoute()
@@ -54,6 +54,7 @@ const encodingOptions = [
 ]
 const propertyOptions = ref([])
 const selectedProperties = ref([])
+const unmappedProperties = ref('keep')
 const importing = ref(false)
 
 const allChecked = computed({
@@ -61,13 +62,22 @@ const allChecked = computed({
     return csvContent.value?.every((x) => x.selected)
   },
   set: (value) => {
-    for (const x of csvContent.value?.filter((x) => !x._id) ?? []) {
+    for (const x of csvContent.value?.filter((x) => !x.savedId) ?? []) {
       x.selected = value
     }
   }
 })
 
-const someChecked = computed(() => csvContent.value?.filter((x) => !x._id)?.some((x) => x.selected) && !allChecked.value)
+const someChecked = computed(() => csvContent.value?.filter((x) => !x.savedId)?.some((x) => x.selected) && !allChecked.value)
+
+const idIndex = computed(() => selectedProperties.value.indexOf('_id'))
+
+const isUpdateMode = computed(() => idIndex.value > -1)
+
+const isDeleteMode = computed(() => isUpdateMode.value && unmappedProperties.value === 'delete')
+
+const updateCount = computed(() => csvContent.value?.filter((x) => !x.savedId && x.selected && getRowId(x)).length || 0)
+
 watch(file, (value) => {
   if (!value) return
 
@@ -81,9 +91,9 @@ watch(file, (value) => {
   reader.readAsArrayBuffer(value)
 })
 
-const checkedCount = computed(() => csvContent.value?.filter((x) => !x._id).filter((x) => x.selected)?.length || 0)
+const checkedCount = computed(() => csvContent.value?.filter((x) => !x.savedId).filter((x) => x.selected)?.length || 0)
 
-const hasPropertyMapping = computed(() => selectedProperties.value.some(Boolean))
+const hasPropertyMapping = computed(() => selectedProperties.value.some((x) => x && x !== '_id'))
 
 watch([file, encoding], ([fileValue, encodingValue]) => {
   if (!fileValue) return
@@ -104,7 +114,7 @@ watch([file, encoding], ([fileValue, encodingValue]) => {
 })
 
 async function getTypes () {
-  const { entities } = await $fetch(`${runtimeConfig.public.entuApiUrl}/${query.account}/entity`, {
+  const { entities } = await $fetch(`${runtimeConfig.public.entuApiUrl}/${encodeURIComponent(query.account)}/entity`, {
     headers: { Authorization: `Bearer ${query.token}` },
     query: {
       '_parent.reference': query.type,
@@ -120,12 +130,15 @@ async function getTypes () {
     return
   }
 
-  propertyOptions.value = entities.map((x) => ({
-    value: getValue(x.name, locale.value),
-    label: getValue(x.label, locale.value),
-    type: getValue(x.type, locale.value),
-    ordinal: getValue(x.ordinal, locale.value, 'number')
-  })).sort((a, b) => a.ordinal - b.ordinal)
+  propertyOptions.value = [
+    { value: '_id', label: '_id', type: '_id' },
+    ...entities.map((x) => ({
+      value: getValue(x.name, locale.value),
+      label: getValue(x.label, locale.value),
+      type: getValue(x.type, locale.value),
+      ordinal: getValue(x.ordinal, locale.value, 'number')
+    })).filter((x) => x.value && isPluginProperty(x.value)).sort((a, b) => a.ordinal - b.ordinal)
+  ]
 }
 
 function csvUpload (data) {
@@ -165,68 +178,118 @@ function convertValue (datatype, value) {
   }
 }
 
+// Creates a new entity from every selected row, or with an _id column updates the row's entity; each row gets its own status.
 async function doImport () {
   importing.value = true
 
-  const entities = []
+  const params = { apiUrl: runtimeConfig.public.entuApiUrl, account: query.account, token: query.token }
+  const deleteNames = isDeleteMode.value
+    ? propertyOptions.value.map((x) => x.value).filter((x) => x !== '_id' && !selectedProperties.value.includes(x))
+    : []
 
-  for (const [index, row] of csvContent.value.entries()) {
-    if (row._id) continue
+  for (const row of csvContent.value) {
+    if (row.savedId) continue
     if (!row.selected) continue
 
-    const properties = [
-      { type: '_type', reference: query.type }
-    ]
+    const entityId = getRowId(row)
+    const values = getRowValues(row)
 
-    if (query.parent) {
-      properties.push({ type: '_parent', reference: query.parent })
+    try {
+      if (entityId) {
+        if (!isEntityId(entityId)) {
+          throw new Error('Invalid entity _id')
+        }
+
+        const entity = await getEntity({ ...params, entityId })
+
+        if (getValue(entity._type, locale.value, 'reference') !== query.type) {
+          throw new Error('Entity is of another type')
+        }
+
+        row.savedId = await saveEntity({ ...params, entityId, ...getUpdateChanges(entity, values, deleteNames) })
+        row.status = 'updated'
+      }
+      else {
+        const properties = [{ type: '_type', reference: query.type }]
+
+        if (query.parent) {
+          properties.push({ type: '_parent', reference: query.parent })
+        }
+
+        row.savedId = await saveEntity({ ...params, properties: [...properties, ...values] })
+        row.status = 'created'
+      }
     }
-
-    for (const [i, value] of row.data.entries()) {
-      const property = selectedProperties.value[i]
-
-      if (!property) continue
-
-      const datatype = propertyOptions.value.find((x) => x.value === property)?.type
-
-      if (!datatype) continue
-
-      if (value === null || value === undefined) continue
-
-      properties.push({ type: property, [datatype]: convertValue(datatype, value) })
+    catch {
+      row.status = 'error'
     }
-
-    entities.push({ index, properties })
-  }
-
-  for (let i = 0; i < entities.length; i++) {
-    const entity = entities[i]
-
-    const result = await fetch(`${runtimeConfig.public.entuApiUrl}/${query.account}/entity`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${query.token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(entity.properties)
-    })
-
-    if (!result.ok) {
-      error.value = 'Failed to add entity!'
-
-      setTimeout(() => {
-        error.value = null
-      }, 3000)
-
-      return
-    }
-
-    const { _id } = await result.json()
-
-    csvContent.value[entity.index]._id = _id
   }
 
   importing.value = false
+}
+
+function onImportClick () {
+  if (isDeleteMode.value) return
+
+  doImport()
+}
+
+// Returns the row's entity _id when the _id column is mapped and filled.
+function getRowId (row) {
+  if (idIndex.value < 0) return
+
+  const value = row.data[idIndex.value]
+
+  if (value === null || value === undefined) return
+
+  return `${value}`.trim() || undefined
+}
+
+// Returns the row's mapped cells as property values, skipping empty cells and the _id column.
+function getRowValues (row) {
+  const values = []
+
+  for (const [i, value] of row.data.entries()) {
+    const property = selectedProperties.value[i]
+
+    if (!property || property === '_id') continue
+
+    const datatype = propertyOptions.value.find((x) => x.value === property)?.type
+
+    if (!datatype) continue
+    if (value === null || value === undefined || value === '') continue
+
+    values.push({ type: property, [datatype]: convertValue(datatype, value) })
+  }
+
+  return values
+}
+
+// Replaces the current values of each property the row fills, unchanged values left as they are, and deletes all values of deleteNames.
+function getUpdateChanges (entity, values, deleteNames) {
+  const properties = []
+  const deleteIds = []
+
+  for (const name of new Set(values.map((x) => x.type))) {
+    const current = entity[name] || []
+    const newValues = values.filter((x) => x.type === name)
+
+    for (const [i, value] of newValues.entries()) {
+      const old = current.at(i)
+
+      if (old && getValueText(old) === getValueText(value)) continue
+
+      properties.push(old ? { ...value, _id: old._id } : value)
+    }
+
+    deleteIds.push(...current.slice(newValues.length).map((x) => x._id))
+  }
+
+  for (const name of deleteNames) {
+    deleteIds.push(...(entity[name] || []).map((x) => x._id))
+  }
+
+  return { properties, deleteIds }
 }
 
 onMounted(() => {
@@ -326,11 +389,12 @@ onMounted(() => {
           v-for="(row, rowIndex) in csvContent"
           :key="rowIndex"
           class="group border-t border-slate-200 hover:bg-slate-50"
+          :title="row.status ? t(row.status) : undefined"
         >
           <td class="p-3">
             <n-checkbox
               v-model:checked="row.selected"
-              :disabled="!!row._id"
+              :disabled="!!row.savedId"
             />
           </td>
           <td
@@ -339,10 +403,10 @@ onMounted(() => {
             class="text-sm"
           >
             <nuxt-link
-              v-if="row._id"
-              class="block w-full p-3 text-green-600"
+              v-if="row.savedId"
+              class="block w-full p-3 text-green-600 dark:text-green-400"
               target="_blank"
-              :to="`${runtimeConfig.public.entuUrl}/${query.account}/${row._id}#edit`"
+              :to="`${runtimeConfig.public.entuUrl}/${encodeURIComponent(query.account)}/${encodeURIComponent(row.savedId)}#edit`"
             >
               {{ column }}
             </nuxt-link>
@@ -350,6 +414,7 @@ onMounted(() => {
             <div
               v-else
               class="block w-full p-3"
+              :class="{ 'text-red-600 dark:text-red-400': row.status === 'error' }"
             >
               {{ column }}
             </div>
@@ -369,18 +434,46 @@ onMounted(() => {
           :options="encodingOptions"
         />
       </n-form-item>
+
+      <n-form-item
+        v-if="isUpdateMode"
+        class="mt-4"
+        :label="t('unmappedProperties')"
+      >
+        <n-radio-group v-model:value="unmappedProperties">
+          <n-radio
+            value="keep"
+            :label="t('keep')"
+          />
+          <n-radio
+            value="delete"
+            :label="t('delete')"
+          />
+        </n-radio-group>
+      </n-form-item>
     </n-form>
 
     <div class="flex w-full justify-center">
-      <n-button
+      <n-popconfirm
         v-if="csvContent?.length && !importing"
-        class="block"
-        type="primary"
-        :disabled="checkedCount === 0 || !hasPropertyMapping"
-        @click="doImport()"
+        :disabled="!isDeleteMode"
+        :negative-text="t('cancel')"
+        :positive-text="t('import', checkedCount || 0)"
+        @positive-click="doImport()"
       >
-        {{ t('import', checkedCount || 0) }}
-      </n-button>
+        <template #trigger>
+          <n-button
+            class="block"
+            type="primary"
+            :disabled="checkedCount === 0 || !hasPropertyMapping"
+            @click="onImportClick()"
+          >
+            {{ t('import', checkedCount || 0) }}
+          </n-button>
+        </template>
+
+        {{ t('confirmDelete', updateCount) }}
+      </n-popconfirm>
 
       <div
         v-else-if="importing"
@@ -399,14 +492,30 @@ onMounted(() => {
     errorNoToken: No token parameter!
     uploadText: Click or drag a CSV file to this area to upload.
     encoding: 'Encoding (if you see strange characters in the table, try changing the file encoding):'
-    fieldInfo: Choose which rows to import and what column corresponds to which property.
+    fieldInfo: Choose which rows to import and what column corresponds to which property. Map a column to _id to update existing entities.
     import: Import | Import {n} rows | Import {n} rows
+    unmappedProperties: 'Properties not mapped to a column:'
+    keep: Keep
+    delete: Delete
+    cancel: Cancel
+    confirmDelete: No entity will be updated. | Values of properties not mapped to a column will be deleted from {n} entity. | Values of properties not mapped to a column will be deleted from {n} entities.
+    created: Created
+    updated: Updated
+    error: Failed
   et:
     errorNoAccount: Puudub parameeter "account"!
     errorNoType: Puudub parameeter "type"!
     errorNoToken: Puudub parameeter "token"!
     uploadText: Lohista CSV fail siia või klõpsa siin, et fail valida.
     encoding: 'Faili kodeering (kui tabeli tekstis on veidrad märgid, proovi muuta faili kodeeringut):'
-    fieldInfo: Vali mis read importida ja milline veerg vastab millisele parameetrile.
+    fieldInfo: Vali mis read importida ja milline veerg vastab millisele parameetrile. Olemasolevate objektide uuendamiseks seo veerg _id-ga.
     import: Impordi | Impordi {n} rida | Impordi {n} rida
+    unmappedProperties: 'Veeruga sidumata parameetrid:'
+    keep: Säilita
+    delete: Kustuta
+    cancel: Loobu
+    confirmDelete: Ühtegi objekti ei uuendata. | {n} objektilt kustutatakse veeruga sidumata parameetrite väärtused. | {n} objektilt kustutatakse veeruga sidumata parameetrite väärtused.
+    created: Lisatud
+    updated: Uuendatud
+    error: Ebaõnnestus
 </i18n>

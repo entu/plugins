@@ -3,13 +3,11 @@ import { NButton, NInput, NInputGroup, NSpin, NTable } from 'naive-ui'
 
 const { locale, t } = useI18n()
 const { query } = useRoute()
-const runtimeConfig = useRuntimeConfig()
+const { definitions, entity, error, isAdding, isEdit, sourceProperties, doCancel, doSave, importProperties, init } = useEntityImport()
 
-const error = ref(null)
 const queryString = ref('')
 const esterItems = ref([])
 const isLoading = ref(false)
-const isAdding = ref(false)
 
 async function doSearch () {
   if (isLoading.value || !queryString.value) return
@@ -23,19 +21,9 @@ async function doSearch () {
 }
 
 async function doImport (item) {
-  if (!query.account) return
-  if (!query.type) return
-  if (!query.token) return
-
   isAdding.value = true
 
-  const properties = [
-    { type: '_type', reference: query.type }
-  ]
-
-  if (query.parent) {
-    properties.push({ type: '_parent', reference: query.parent })
-  }
+  const properties = []
 
   for (const [key, value] of Object.entries(item)) {
     for (const i of value) {
@@ -46,19 +34,7 @@ async function doImport (item) {
     }
   }
 
-  const response = await $fetch(`${runtimeConfig.public.entuApiUrl}/${query.account}/entity`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${query.token}` },
-    body: properties.filter((x) => x.type && (x.string || x.reference))
-  })
-
-  if (!response?._id) {
-    error.value = 'Failed to import entity!'
-    isAdding.value = false
-    return
-  }
-
-  await navigateTo(`${runtimeConfig.public.entuUrl}/${query.account}/${response._id}#edit`, { external: true, open: { target: '_top' } })
+  await importProperties(properties.filter((x) => x.type && x.string))
 }
 
 function convertType (type) {
@@ -79,20 +55,13 @@ function doScan (value) {
   doSearch()
 }
 
-onMounted(() => {
+onMounted(async () => {
   locale.value = query.locale || 'en'
 
-  if (!query.account) {
-    error.value = 'No account parameter!'
-    return
-  }
+  const searchText = await init()
 
-  if (!query.type) {
-    error.value = 'No type parameter!'
-  }
-
-  if (!query.token) {
-    error.value = 'No token parameter!'
+  if (searchText) {
+    doScan(searchText)
   }
 })
 </script>
@@ -111,6 +80,15 @@ onMounted(() => {
   >
     <n-spin show />
   </div>
+
+  <compare-properties
+    v-else-if="sourceProperties"
+    :definitions="definitions"
+    :entity="entity"
+    :source-properties="sourceProperties"
+    @cancel="doCancel()"
+    @save="doSave"
+  />
 
   <div
     v-else
@@ -180,7 +158,7 @@ onMounted(() => {
               </div>
 
               <n-button @click="doImport(item)">
-                {{ t('import') }}
+                {{ isEdit ? t('update') : t('import') }}
               </n-button>
             </td>
           </tr>
@@ -196,9 +174,11 @@ onMounted(() => {
     searchInfo: Search from ESTER
     source: Data provided by ESTER
     import: Import
+    update: Update
   et:
     search: Otsi
     searchInfo: Otsi ESTER-ist
     source: "Andmed: e-kataloog ESTER"
     import: Impordi
+    update: Uuenda
   </i18n>

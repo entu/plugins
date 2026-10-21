@@ -48,7 +48,7 @@ Search and import LEGO set data, including set images, from [Brickset](https://b
 ### CSV Import Plugin (`/csv`)
 Import data from CSV files with support for multiple encodings.
 
-Imported properties: mapped by the user from CSV columns.
+Imported properties: mapped by the user from CSV columns. Map a column to `_id` to update the entities with those IDs instead of creating new ones; properties not mapped to a column can then be kept or deleted.
 
 ### Discogs Import Plugin (`/discogs`)
 Search and import music release data from the [Discogs](https://www.discogs.com) database.
@@ -210,12 +210,17 @@ All plugins use the same parameter structure:
 
 ### Required Parameters
 - **`account`** - The Entu account where entities will be created
-- **`type`** - The entity type/class for new entities
+- **`type`** - The entity type/class for new entities (not needed with `entity`)
 - **`token`** - Bearer token for API authentication
 
 ### Optional Parameters
+- **`entity`** - ID of an existing entity to update (sent by Entu for `entity-edit` plugins)
 - **`parent`** - Reference ID of parent entity for hierarchical relationships
 - **`locale`** - Interface language (supported: 'en', 'et', etc.)
+
+## Updating Existing Entities
+
+Every source plugin (BGG, Brickset, Discogs, Ester, IGDB, MusicBrainz, Numista, Open Library, TMDB) also works as an `entity-edit` plugin. Given `entity`, it searches for the entity's `isn` or `barcode` if it has one, and after a result is picked shows every property with its current and source values. For each value the user chooses keep, overwrite, add, skip or delete; only the chosen changes are written, and properties the source doesn't return can be deleted too.
 
 ## Usage Examples
 

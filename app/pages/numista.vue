@@ -3,13 +3,11 @@ import { NButton, NInput, NInputGroup, NSpin, NTable } from 'naive-ui'
 
 const { locale, t } = useI18n()
 const { query } = useRoute()
-const runtimeConfig = useRuntimeConfig()
+const { definitions, entity, error, isAdding, isEdit, sourceProperties, doCancel, doSave, importProperties, init } = useEntityImport()
 
-const error = ref(null)
 const queryString = ref('')
 const types = ref([])
 const isLoading = ref(false)
-const isAdding = ref(false)
 
 const typesListElement = useTemplateRef('typesListElement')
 const typesVisible = ref(20)
@@ -37,21 +35,11 @@ async function doSearch () {
 }
 
 async function doImport (item) {
-  if (!query.account) return
-  if (!query.type) return
-  if (!query.token) return
-
   isAdding.value = true
 
   const { type, covers } = await $fetch('/api/numista/type', { query: { id: item.id } })
 
-  const properties = [
-    { type: '_type', reference: query.type }
-  ]
-
-  if (query.parent) {
-    properties.push({ type: '_parent', reference: query.parent })
-  }
+  const properties = []
 
   for (const [key, value] of Object.entries(type)) {
     for (const i of value) {
@@ -69,81 +57,22 @@ async function doImport (item) {
       type: 'photo',
       filename: photo.filename,
       filesize: photo.blob.size,
-      filetype: 'image/jpeg'
+      filetype: 'image/jpeg',
+      blob: photo.blob
     })
   }
 
-  const response = await $fetch(`${runtimeConfig.public.entuApiUrl}/${encodeURIComponent(query.account)}/entity`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${query.token}` },
-    body: properties.filter((x) => x.type && (x.string || x.reference || x.filename))
-  })
-
-  if (!response?._id) {
-    error.value = 'Failed to import entity!'
-    isAdding.value = false
-    return
-  }
-
-  for (const photo of photos) {
-    const upload = response.properties?.find((x) => x.type === 'photo' && x.filename === photo.filename)?.upload
-    const isUploaded = await uploadCover(photo.blob, upload)
-
-    if (!isUploaded) {
-      error.value = 'Failed to upload photo!'
-      isAdding.value = false
-      return
-    }
-  }
-
-  await navigateTo(`${runtimeConfig.public.entuUrl}/${encodeURIComponent(query.account)}/${encodeURIComponent(response._id)}#edit`, { external: true, open: { target: '_top' } })
+  await importProperties(properties.filter((x) => x.type && (x.string || x.filename)))
 }
 
-function getCoverBlob (cover) {
-  if (!cover) {
-    return null
-  }
-
-  const bytes = Uint8Array.from(atob(cover), (c) => c.charCodeAt(0))
-
-  return new Blob([bytes], { type: 'image/jpeg' })
-}
-
-function uploadCover (photo, upload) {
-  return new Promise((resolve) => {
-    if (!photo || !upload) {
-      return resolve(false)
-    }
-
-    const request = new XMLHttpRequest()
-    request.open(upload.method, upload.url)
-
-    for (const header in upload.headers) {
-      if (header.toLowerCase() === 'content-length') continue
-
-      request.setRequestHeader(header, upload.headers[header])
-    }
-
-    request.addEventListener('load', () => resolve(request.status === 200))
-    request.addEventListener('error', () => resolve(false))
-    request.send(photo)
-  })
-}
-
-onMounted(() => {
+onMounted(async () => {
   locale.value = query.locale || 'en'
 
-  if (!query.account) {
-    error.value = 'No account parameter!'
-    return
-  }
+  const searchText = await init()
 
-  if (!query.type) {
-    error.value = 'No type parameter!'
-  }
-
-  if (!query.token) {
-    error.value = 'No token parameter!'
+  if (searchText) {
+    queryString.value = searchText
+    doSearch()
   }
 })
 </script>
@@ -162,6 +91,15 @@ onMounted(() => {
   >
     <n-spin show />
   </div>
+
+  <compare-properties
+    v-else-if="sourceProperties"
+    :definitions="definitions"
+    :entity="entity"
+    :source-properties="sourceProperties"
+    @cancel="doCancel()"
+    @save="doSave"
+  />
 
   <div
     v-else
@@ -236,7 +174,7 @@ onMounted(() => {
               </div>
 
               <n-button @click="doImport(item)">
-                {{ t('import') }}
+                {{ isEdit ? t('update') : t('import') }}
               </n-button>
             </td>
           </tr>
@@ -252,9 +190,11 @@ onMounted(() => {
     searchInfo: Search from Numista
     source: Data provided by Numista
     import: Import
+    update: Update
   et:
     search: Otsi
     searchInfo: Otsi Numista-st
     source: "Andmed: Numista"
     import: Impordi
+    update: Uuenda
 </i18n>

@@ -3,15 +3,13 @@ import { NButton, NInput, NInputGroup, NSpin, NTable } from 'naive-ui'
 
 const { locale, t } = useI18n()
 const { query } = useRoute()
-const runtimeConfig = useRuntimeConfig()
+const { definitions, entity, error, isAdding, isEdit, sourceProperties, doCancel, doSave, importProperties, init } = useEntityImport()
 
-const error = ref(null)
 const queryString = ref('')
 const masters = ref([])
 const releases = ref([])
 const selectedMaster = ref(null)
 const isLoading = ref(false)
-const isAdding = ref(false)
 
 const mastersListElement = useTemplateRef('mastersListElement')
 const releasesListElement = useTemplateRef('releasesListElement')
@@ -71,21 +69,11 @@ function doBack () {
 }
 
 async function doImport (item) {
-  if (!query.account) return
-  if (!query.type) return
-  if (!query.token) return
-
   isAdding.value = true
 
   const { release, cover } = await $fetch('/api/discogs/release', { query: { id: item.id } })
 
-  const properties = [
-    { type: '_type', reference: query.type }
-  ]
-
-  if (query.parent) {
-    properties.push({ type: '_parent', reference: query.parent })
-  }
+  const properties = []
 
   for (const [key, value] of Object.entries(release)) {
     for (const i of value) {
@@ -103,62 +91,12 @@ async function doImport (item) {
       type: 'photo',
       filename: `cover-${item.id}.jpg`,
       filesize: photo.size,
-      filetype: 'image/jpeg'
+      filetype: 'image/jpeg',
+      blob: photo
     })
   }
 
-  const response = await $fetch(`${runtimeConfig.public.entuApiUrl}/${encodeURIComponent(query.account)}/entity`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${query.token}` },
-    body: properties.filter((x) => x.type && (x.string || x.reference || x.filename))
-  })
-
-  if (!response?._id) {
-    error.value = 'Failed to import entity!'
-    isAdding.value = false
-    return
-  }
-
-  const isUploaded = await uploadCover(photo, response.properties?.find((x) => x.type === 'photo')?.upload)
-
-  if (photo && !isUploaded) {
-    error.value = 'Failed to upload cover!'
-    isAdding.value = false
-    return
-  }
-
-  await navigateTo(`${runtimeConfig.public.entuUrl}/${encodeURIComponent(query.account)}/${encodeURIComponent(response._id)}#edit`, { external: true, open: { target: '_top' } })
-}
-
-function getCoverBlob (cover) {
-  if (!cover) {
-    return null
-  }
-
-  const bytes = Uint8Array.from(atob(cover), (c) => c.charCodeAt(0))
-
-  return new Blob([bytes], { type: 'image/jpeg' })
-}
-
-function uploadCover (photo, upload) {
-  return new Promise((resolve) => {
-    if (!photo || !upload) {
-      return resolve(false)
-    }
-
-    const request = new XMLHttpRequest()
-    request.open(upload.method, upload.url)
-
-    for (const header in upload.headers) {
-      if (header.toLowerCase() === 'content-length') continue
-
-      request.setRequestHeader(header, upload.headers[header])
-    }
-
-    request.addEventListener('load', () => resolve(request.status === 200))
-    request.addEventListener('error', () => resolve(false))
-    request.send(photo)
-  })
+  await importProperties(properties.filter((x) => x.type && (x.string || x.filename)))
 }
 
 function doScan (value) {
@@ -166,20 +104,13 @@ function doScan (value) {
   doSearch()
 }
 
-onMounted(() => {
+onMounted(async () => {
   locale.value = query.locale || 'en'
 
-  if (!query.account) {
-    error.value = 'No account parameter!'
-    return
-  }
+  const searchText = await init()
 
-  if (!query.type) {
-    error.value = 'No type parameter!'
-  }
-
-  if (!query.token) {
-    error.value = 'No token parameter!'
+  if (searchText) {
+    doScan(searchText)
   }
 })
 </script>
@@ -198,6 +129,15 @@ onMounted(() => {
   >
     <n-spin show />
   </div>
+
+  <compare-properties
+    v-else-if="sourceProperties"
+    :definitions="definitions"
+    :entity="entity"
+    :source-properties="sourceProperties"
+    @cancel="doCancel()"
+    @save="doSave"
+  />
 
   <div
     v-else
@@ -291,7 +231,7 @@ onMounted(() => {
               </div>
 
               <n-button @click="doImport(item)">
-                {{ t('import') }}
+                {{ isEdit ? t('update') : t('import') }}
               </n-button>
             </td>
           </tr>
@@ -368,6 +308,7 @@ onMounted(() => {
     releases: Releases
     back: Back
     import: Import
+    update: Update
   et:
     search: Otsi
     searchInfo: Otsi Discogs-ist
@@ -375,4 +316,5 @@ onMounted(() => {
     releases: Väljaanded
     back: Tagasi
     import: Impordi
+    update: Uuenda
 </i18n>
