@@ -179,11 +179,12 @@ async function getExistingTypes () {
 }
 
 async function getParentType () {
-  const { account, token, parent } = query
+  const { account, token } = query
+  const parentId = getParentIds(query.parent).at(0)
 
-  if (!account || !token || !parent) return
+  if (!account || !token || !parentId) return
 
-  const data = await $fetch(`${runtimeConfig.public.entuApiUrl}/${account}/entity/${parent}`, {
+  const data = await $fetch(`${runtimeConfig.public.entuApiUrl}/${account}/entity/${parentId}`, {
     headers: { Authorization: `Bearer ${token}` },
     query: { props: 'name' }
   })

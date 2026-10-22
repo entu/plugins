@@ -210,11 +210,10 @@ async function doImport () {
         row.status = 'updated'
       }
       else {
-        const properties = [{ type: '_type', reference: query.type }]
-
-        if (query.parent) {
-          properties.push({ type: '_parent', reference: query.parent })
-        }
+        const properties = [
+          { type: '_type', reference: query.type },
+          ...getParentIds(query.parent).map((x) => ({ type: '_parent', reference: x }))
+        ]
 
         row.savedId = await saveEntity({ ...params, properties: [...properties, ...values] })
         row.status = 'created'

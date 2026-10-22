@@ -61,11 +61,10 @@ export function useEntityImport () {
       return
     }
 
-    const newProperties = [{ type: '_type', reference: query.type }]
-
-    if (query.parent) {
-      newProperties.push({ type: '_parent', reference: query.parent })
-    }
+    const newProperties = [
+      { type: '_type', reference: query.type },
+      ...getParentIds(query.parent).map((x) => ({ type: '_parent', reference: x }))
+    ]
 
     await doSave({ properties: [...newProperties, ...properties] })
   }

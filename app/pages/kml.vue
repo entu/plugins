@@ -498,11 +498,10 @@ async function createEntity (entityData) {
 }
 
 function buildEntityProperties (entityData) {
-  const baseProperties = [{ type: '_type', reference: query.type }]
-
-  if (query.parent) {
-    baseProperties.push({ type: '_parent', reference: query.parent })
-  }
+  const baseProperties = [
+    { type: '_type', reference: query.type },
+    ...getParentIds(query.parent).map((x) => ({ type: '_parent', reference: x }))
+  ]
 
   if (entityData.properties.name) {
     baseProperties.push({

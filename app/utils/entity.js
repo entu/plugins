@@ -36,6 +36,13 @@ export function isEntityId (value) {
   return /^[a-f\d]{24}$/i.test(value || '')
 }
 
+// Returns the unique valid entity _ids from the comma-separated parent query parameter; invalid values are dropped.
+export function getParentIds (parent) {
+  const ids = [parent].flat().join(',').split(',').map((x) => x.trim().toLowerCase()).filter(isEntityId)
+
+  return [...new Set(ids)]
+}
+
 // Returns whether a property may be shown and changed by a plugin - never system or credential properties.
 export function isPluginProperty (name) {
   return !name.startsWith('_') && !credentialProperties.includes(name)
